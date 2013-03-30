@@ -20,13 +20,14 @@
 // Package stack implements a LIFO (last in first out) data structure supporting
 // arbitrary types (even a mixture).
 //
-// Internally it uses a slice of blocks, resulting in faster resizing than a
-// simple dynamic array/slice would allow.
+// Internally it uses a dynamically growing slice of blocks, resulting in faster
+// resizes than a simple dynamic array/slice would allow.
 package stack
 
 // The size of a block of data
 const blockSize = 4096
 
+// Last in, first out data structure.
 type Stack struct {
 	size     int
 	capacity int

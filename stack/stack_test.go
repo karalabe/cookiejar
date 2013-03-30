@@ -16,12 +16,6 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
-
-// Package stack implements a LIFO (last in first out) data structure supporting
-// arbitrary types (even a mixture).
-//
-// Internally it uses a slice of blocks, resulting in faster resizing than a
-// simple dynamic array/slice would allow.
 package stack
 
 import (
