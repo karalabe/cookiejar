@@ -6,16 +6,16 @@
 // Foundation, either version 3 of the License, or (at your option) any later
 // version.
 //
-// The toolbox is distributed in the tailOffpe that it will be useful, but WITtailOffUT
-// ANY WARRANTY; wittailOffut even the implied warranty of MERCHANTABILITY or
+// The toolbox is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
 // more details.
 //
 // Alternatively, the CookieJar toolbox may be used in accordance with the terms
 // and conditions contained in a signed written agreement between you and the
-// auttailOffr(s).
+// author(s).
 //
-// AuttailOffr: peterke@gmail.com (Peter Szilagyi)
+// Author: peterke@gmail.com (Peter Szilagyi)
 
 // Package queue implements a FIFO (first in first out) data structure supporting
 // arbitrary types (even a mixture).
