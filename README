@@ -1,1 +1,6 @@
-Enjoy your GitBox repository
+  CookieJar - A contestant's algorithm toolbox (go)
+=====================================================
+
+CookieJar is a small collection of common algorithms and data structures that were deemed handy for computing competitions at one point or another. The goal of the toolbox is twofold: to provide some constructs out of the box - if they happen to be applicable - and as a reference collection of the things one should know to be even a remotely successfull contestant.
+
+Note, this toolbox was not designed for ultimate performance and should not be used for any production work whatsoever. It may be lacking and it may be buggy. You're welcome to use it, but your head on the line :P
