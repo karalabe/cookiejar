@@ -65,7 +65,7 @@ func (b *Bag) Do(f func(interface{})) {
 	}
 }
 
-// Clears the contents of a bag
+// Clears the contents of a bag.
 func (b *Bag) Reset() {
 	b.data = make(map[interface{}]int)
 }
