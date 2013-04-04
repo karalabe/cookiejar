@@ -34,7 +34,7 @@ import (
 	"github.com/karalabe/cookiejar/queue"
 )
 
-// Simple usage example that inserts the numbers 1, 2, 3 into a queue and then
+// Simple usage example that inserts the numbers 0, 1, 2 into a queue and then
 // removes them one by one, printing them to the standard output.
 func Example_usage() {
 	// Create a queue an push some data in

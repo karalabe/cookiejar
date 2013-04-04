@@ -41,22 +41,24 @@ func TestQueue(t *testing.T) {
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()
 	}
-	// Push all the data into the queue, pop out every second, then the rest
-	outs := []int{}
 	queue := New()
-	for i := 0; i < size; i++ {
-		queue.Push(data[i])
-		if i%2 == 0 {
+	for rep := 0; rep < 2; rep++ {
+		// Push all the data into the queue, pop out every second, then the rest
+		outs := []int{}
+		for i := 0; i < size; i++ {
+			queue.Push(data[i])
+			if i%2 == 0 {
+				outs = append(outs, queue.Pop().(int))
+			}
+		}
+		for !queue.Empty() {
 			outs = append(outs, queue.Pop().(int))
 		}
-	}
-	for !queue.Empty() {
-		outs = append(outs, queue.Pop().(int))
-	}
-	// Make sure the contents of the resulting slices are ok
-	for i := 0; i < size; i++ {
-		if data[i] != outs[i] {
-			t.Errorf("push/pop mismatch: have %v, want %v.", outs[i], data[i])
+		// Make sure the contents of the resulting slices are ok
+		for i := 0; i < size; i++ {
+			if data[i] != outs[i] {
+				t.Errorf("push/pop mismatch: have %v, want %v.", outs[i], data[i])
+			}
 		}
 	}
 }
