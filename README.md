@@ -12,10 +12,10 @@ Algorithms:
  - Work in progress
 
 Data Structures:
- - Bag
- - Queue
- - Set
- - Stack
+ - [Bag](http://godoc.org/github.com/karalabe/cookiejar/bag)
+ - [Queue](http://godoc.org/github.com/karalabe/cookiejar/queue)
+ - [Set](http://godoc.org/github.com/karalabe/cookiejar/set)
+ - [Stack](http://godoc.org/github.com/karalabe/cookiejar/stack)
 
   Performance
 ---------------
