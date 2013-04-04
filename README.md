@@ -20,8 +20,18 @@ Data Structures:
   Performance
 ---------------
 
-The benchmark results were obtained with the following command:
-
-```bash
-# go test -run=NONE -bench=. -benchtime=100ms ./...
-```
+Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz:
+- bag
+    - BenchmarkInsert    298     ns/op
+    - BenchmarkRemove    186     ns/op
+    - BenchmarkDo        27.8    ns/op
+- queue
+    - BenchmarkPush      23.4    ns/op
+    - BenchmarkPop       4.05    ns/op
+- set
+    - BenchmarkInsert    253     ns/op
+    - BenchmarkRemove    109     ns/op
+    - BenchmarkDo        20.8    ns/op
+- stack
+    - BenchmarkPush      16.4    ns/op
+    - BenchmarkPop       5.05    ns/op
