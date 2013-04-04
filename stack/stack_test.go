@@ -30,26 +30,28 @@ func TestStack(t *testing.T) {
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()
 	}
-	// Push all the data into the stack, pop out every second
-	secs := []int{}
 	stack := New()
-	for i := 0; i < size; i++ {
-		stack.Push(data[i])
-		if i%2 == 0 {
-			secs = append(secs, stack.Pop().(int))
+	for rep := 0; rep < 2; rep++ {
+		// Push all the data into the stack, pop out every second
+		secs := []int{}
+		for i := 0; i < size; i++ {
+			stack.Push(data[i])
+			if i%2 == 0 {
+				secs = append(secs, stack.Pop().(int))
+			}
 		}
-	}
-	rest := []int{}
-	for !stack.Empty() {
-		rest = append(rest, stack.Pop().(int))
-	}
-	// Make sure the contents of the resulting slices are ok
-	for i := 0; i < size; i++ {
-		if i%2 == 0 && data[i] != secs[i/2] {
-			t.Errorf("push/pop mismatch: have %v, want %v.", secs[i/2], data[i])
+		rest := []int{}
+		for !stack.Empty() {
+			rest = append(rest, stack.Pop().(int))
 		}
-		if i%2 == 1 && data[i] != rest[len(rest)-i/2-1] {
-			t.Errorf("push/pop mismatch: have %v, want %v.", rest[len(rest)-i/2-1], data[i])
+		// Make sure the contents of the resulting slices are ok
+		for i := 0; i < size; i++ {
+			if i%2 == 0 && data[i] != secs[i/2] {
+				t.Errorf("push/pop mismatch: have %v, want %v.", secs[i/2], data[i])
+			}
+			if i%2 == 1 && data[i] != rest[len(rest)-i/2-1] {
+				t.Errorf("push/pop mismatch: have %v, want %v.", rest[len(rest)-i/2-1], data[i])
+			}
 		}
 	}
 }

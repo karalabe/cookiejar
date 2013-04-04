@@ -53,6 +53,9 @@ func (s *Stack) Push(data interface{}) {
 		s.blocks = append(s.blocks, s.active)
 		s.capacity += blockSize
 		s.offset = 0
+	} else if s.offset == blockSize {
+		s.active = s.blocks[s.size/blockSize]
+		s.offset = 0
 	}
 	s.active[s.offset] = data
 	s.offset++
