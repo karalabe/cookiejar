@@ -20,7 +20,7 @@ package queue_test
 
 import (
 	"fmt"
-	"queue"
+	"github.com/karalabe/cookiejar/queue"
 )
 
 // Simple usage example that inserts the numbers 1, 2, 3 into a queue and then

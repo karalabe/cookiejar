@@ -20,7 +20,7 @@ package stack_test
 
 import (
 	"fmt"
-	"stack"
+	"github.com/karalabe/cookiejar/stack"
 )
 
 // Simple usage example that inserts the numbers 1, 2, 3 into a stack and then

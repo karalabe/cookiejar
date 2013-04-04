@@ -19,8 +19,8 @@
 package bag_test
 
 import (
-	"bag"
 	"fmt"
+	"github.com/karalabe/cookiejar/bag"
 )
 
 func Example_usage() {

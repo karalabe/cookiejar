@@ -20,7 +20,7 @@ package set_test
 
 import (
 	"fmt"
-	"set"
+	"github.com/karalabe/cookiejar/set"
 )
 
 func Example_usage() {
