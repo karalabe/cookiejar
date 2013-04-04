@@ -55,7 +55,7 @@ func (s *Stack) Push(data interface{}) {
 		s.offset = 0
 	}
 	s.active[s.offset] = data
-	s.offset++
+	s.offset = (s.offset + 1) % blockSize
 	s.size++
 }
 
