@@ -13,6 +13,7 @@ Algorithms:
 
 Data Structures:
  - [Bag](http://godoc.org/github.com/karalabe/cookiejar/bag)
+ - [Deque](http://godoc.org/github.com/karalabe/cookiejar/deque)
  - [Queue](http://godoc.org/github.com/karalabe/cookiejar/queue)
  - [Set](http://godoc.org/github.com/karalabe/cookiejar/set)
  - [Stack](http://godoc.org/github.com/karalabe/cookiejar/stack)
@@ -26,14 +27,17 @@ Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz:
     - BenchmarkInsert    298     ns/op
     - BenchmarkRemove    186     ns/op
     - BenchmarkDo        27.8    ns/op
+- deque
+    - BenchmarkPush      24.8    ns/op
+    - BenchmarkPop       4.68    ns/op
 - queue
-    - BenchmarkPush      23.4    ns/op
-    - BenchmarkPop       4.05    ns/op
+    - BenchmarkPush      24.6    ns/op
+    - BenchmarkPop       4.04    ns/op
 - set
     - BenchmarkInsert    253     ns/op
-    - BenchmarkRemove    109     ns/op
+    - BenchmarkRemove    110     ns/op
     - BenchmarkDo        20.8    ns/op
 - stack
     - BenchmarkPush      16.4    ns/op
-    - BenchmarkPop       5.05    ns/op
+    - BenchmarkPop       5.06    ns/op
 ```
