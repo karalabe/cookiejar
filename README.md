@@ -22,9 +22,9 @@ Data Structures:
 
 Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz:
 - bag
-    - BenchmarkInsert    298     ns/op
-    - BenchmarkRemove    186     ns/op
-    - BenchmarkDo        27.8    ns/op
+    - BenchmarkInsert	298	ns/op
+    - BenchmarkRemove	186	ns/op
+    - BenchmarkDo	27.8	ns/op
 - queue
     - BenchmarkPush      23.4    ns/op
     - BenchmarkPop       4.05    ns/op
