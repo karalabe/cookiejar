@@ -23,6 +23,7 @@ import (
 	"github.com/karalabe/cookiejar/set"
 )
 
+// Insert some numbers into a set, remove one and sum the remainder.
 func Example_usage() {
 	// Create a new set and insert some data
 	s := set.New()
@@ -38,7 +39,7 @@ func Example_usage() {
 	} else {
 		fmt.Println("Welcome To Facebook")
 	}
-	// Sum teh remainder and output
+	// Sum the remainder and output
 	sum := 0.0
 	s.Do(func(val interface{}) {
 		sum += val.(float64)

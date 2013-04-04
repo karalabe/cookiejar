@@ -23,6 +23,7 @@ import (
 	"github.com/karalabe/cookiejar/bag"
 )
 
+// Small demo of the common functions in the bag package.
 func Example_usage() {
 	// Create a new bag with some integers in it
 	b := bag.New()
