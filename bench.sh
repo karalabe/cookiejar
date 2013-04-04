@@ -8,9 +8,8 @@ echo "Running tests..."
 go test ./...
 
 # Run all the benchmarks, individually (race condition bug in go test)
-cpu=`cat /proc/cpuinfo | grep "model name" | head -n 1 | cut -d ':' -f 2 | sed -e 's/^ *//g' -e 's/  */ /g' -e 's/ *$//g'`
 echo
-echo "Bencmark results on $cpu:"
+echo "`cat /proc/cpuinfo | grep 'model name' | head -n 1 | cut -d ':' -f 2 | sed -e 's/^ *//g' -e 's/  */ /g' -e 's/ *$//g'`:"
 
 packs=`find . -mindepth 1 -type d | grep -v "\./\." | sort`
 for pkg in $packs; do
