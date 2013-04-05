@@ -86,6 +86,80 @@ func TestDeque(t *testing.T) {
 	}
 }
 
+func TestQueue(t *testing.T) {
+	// Create some initial data
+	size := 1048576
+	data := make([]int, size)
+	for i := 0; i < size; i++ {
+		data[i] = rand.Int()
+	}
+	// Simulate a queue in both directions
+	deque := New()
+	for rep := 0; rep < 2; rep++ {
+		for _, val := range data {
+			deque.PushLeft(val)
+		}
+		outs := []int{}
+		for !deque.Empty() {
+			outs = append(outs, deque.PopRight().(int))
+		}
+		for i := 0; i < len(data); i++ {
+			if data[i] != outs[i] {
+				t.Errorf("push/pop mismatch: have %v, want %v.", outs[i], data[i])
+			}
+		}
+		for _, val := range data {
+			deque.PushRight(val)
+		}
+		outs = []int{}
+		for !deque.Empty() {
+			outs = append(outs, deque.PopLeft().(int))
+		}
+		for i := 0; i < len(data); i++ {
+			if data[i] != outs[i] {
+				t.Errorf("push/pop mismatch: have %v, want %v.", outs[i], data[i])
+			}
+		}
+	}
+}
+
+func TestStack(t *testing.T) {
+	// Create some initial data
+	size := 1048576
+	data := make([]int, size)
+	for i := 0; i < size; i++ {
+		data[i] = rand.Int()
+	}
+	// Simulate a stack in both directions
+	deque := New()
+	for rep := 0; rep < 2; rep++ {
+		for _, val := range data {
+			deque.PushLeft(val)
+		}
+		outs := []int{}
+		for !deque.Empty() {
+			outs = append(outs, deque.PopLeft().(int))
+		}
+		for i := 0; i < len(data); i++ {
+			if data[i] != outs[len(outs)-i-1] {
+				t.Errorf("push/pop mismatch: have %v, want %v.", outs[len(outs)-i-1], data[i])
+			}
+		}
+		for _, val := range data {
+			deque.PushRight(val)
+		}
+		outs = []int{}
+		for !deque.Empty() {
+			outs = append(outs, deque.PopRight().(int))
+		}
+		for i := 0; i < len(data); i++ {
+			if data[i] != outs[len(outs)-i-1] {
+				t.Errorf("push/pop mismatch: have %v, want %v.", outs[len(outs)-i-1], data[i])
+			}
+		}
+	}
+}
+
 func TestReset(t *testing.T) {
 	// Push some stuff into the deque
 	size := 1048576
