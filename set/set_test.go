@@ -43,20 +43,20 @@ func TestSet(t *testing.T) {
 	}
 	// Fill the set with the data and verify that they're all set
 	set := New()
-	for val := range data {
+	for _, val := range data {
 		set.Insert(val)
 	}
-	for val := range data {
+	for _, val := range data {
 		if !set.Exists(val) {
 			t.Errorf("failed to locate element in set: %v in %v", val, set)
 		}
 	}
 	// Remove a few elements and ensure they're out
 	rems := data[:1024]
-	for val := range rems {
+	for _, val := range rems {
 		set.Remove(val)
 	}
-	for val := range rems {
+	for _, val := range rems {
 		if set.Exists(val) {
 			t.Errorf("element exists after remove: %v in %v", val, set)
 		}
@@ -67,10 +67,10 @@ func TestSet(t *testing.T) {
 		sumSet += int64(val.(int))
 	})
 	sumDat := int64(0)
-	for val := range data {
+	for _, val := range data {
 		sumDat += int64(val)
 	}
-	for val := range rems {
+	for _, val := range rems {
 		sumDat -= int64(val)
 	}
 	if sumSet != sumDat {
@@ -78,7 +78,7 @@ func TestSet(t *testing.T) {
 	}
 	// Clear the set and ensure nothing's left
 	set.Reset()
-	for val := range data {
+	for _, val := range data {
 		if set.Exists(val) {
 			t.Errorf("element exists after reset: %v in %v", val, set)
 		}
@@ -94,7 +94,7 @@ func BenchmarkInsert(b *testing.B) {
 	// Execute the benchmark
 	b.ResetTimer()
 	set := New()
-	for val := range data {
+	for _, val := range data {
 		set.Insert(val)
 	}
 }
@@ -103,13 +103,13 @@ func BenchmarkRemove(b *testing.B) {
 	// Create some initial data and fill the set
 	data := rand.Perm(b.N)
 	set := New()
-	for val := range data {
+	for _, val := range data {
 		set.Insert(val)
 	}
 	// Execute the benchmark (different order)
 	rems := rand.Perm(b.N)
 	b.ResetTimer()
-	for val := range rems {
+	for _, val := range rems {
 		set.Remove(val)
 	}
 }
@@ -122,7 +122,7 @@ func BenchmarkDo(b *testing.B) {
 	}
 	// Fill the set with it
 	set := New()
-	for val := range data {
+	for _, val := range data {
 		set.Insert(val)
 	}
 	// Execute the benchmark

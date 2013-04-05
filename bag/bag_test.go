@@ -82,7 +82,7 @@ func TestReset(t *testing.T) {
 	}
 	// Insert the data into the bag, but remove every second
 	bag := New()
-	for val := range data {
+	for _, val := range data {
 		bag.Insert(val)
 	}
 	// clear the bag and verify
@@ -101,7 +101,7 @@ func BenchmarkInsert(b *testing.B) {
 	// Execute the benchmark
 	b.ResetTimer()
 	bag := New()
-	for val := range data {
+	for _, val := range data {
 		bag.Insert(val)
 	}
 }
@@ -114,12 +114,12 @@ func BenchmarkRemove(b *testing.B) {
 	}
 	// Fill the bag with it
 	bag := New()
-	for val := range data {
+	for _, val := range data {
 		bag.Insert(val)
 	}
 	// Execute the benchmark
 	b.ResetTimer()
-	for val := range data {
+	for _, val := range data {
 		bag.Remove(val)
 	}
 }
@@ -132,7 +132,7 @@ func BenchmarkDo(b *testing.B) {
 	}
 	// Fill the bag with it
 	bag := New()
-	for val := range data {
+	for _, val := range data {
 		bag.Insert(val)
 	}
 	// Execute the benchmark
