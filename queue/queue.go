@@ -82,15 +82,15 @@ func (q *Queue) Push(data interface{}) {
 }
 
 // Pops out an element from the queue. Note, no bounds checking are done.
-func (q *Queue) Pop() interface{} {
-	res := q.head[q.headOff]
+func (q *Queue) Pop() (res interface{}) {
+	res, q.head[q.headOff] = q.head[q.headOff], res
 	q.headOff++
 	if q.headOff == blockSize {
 		q.headOff = 0
 		q.headIdx = (q.headIdx + 1) % len(q.blocks)
 		q.head = q.blocks[q.headIdx]
 	}
-	return res
+	return
 }
 
 // Checks whether the queue is empty.

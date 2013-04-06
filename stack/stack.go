@@ -74,14 +74,15 @@ func (s *Stack) Push(data interface{}) {
 }
 
 // Pops a value off the stack and returns it. Currently no shrinking is done.
-func (s *Stack) Pop() interface{} {
+func (s *Stack) Pop() (res interface{}) {
 	s.size--
 	s.offset--
 	if s.offset < 0 {
 		s.offset = blockSize - 1
 		s.active = s.blocks[s.size/blockSize]
 	}
-	return s.active[s.offset]
+	res, s.active[s.offset] = s.active[s.offset], res
+	return
 }
 
 // Checks whether the stack is empty or not.

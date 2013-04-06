@@ -83,14 +83,15 @@ func (d *Deque) PushRight(data interface{}) {
 }
 
 // Pops out an element from the queue from the right. Note, no bounds checking are done.
-func (d *Deque) PopRight() interface{} {
+func (d *Deque) PopRight() (res interface{}) {
 	d.rightOff--
 	if d.rightOff < 0 {
 		d.rightOff = blockSize - 1
 		d.rightIdx = (d.rightIdx - 1 + len(d.blocks)) % len(d.blocks)
 		d.right = d.blocks[d.rightIdx]
 	}
-	return d.right[d.rightOff]
+	res, d.right[d.rightOff] = d.right[d.rightOff], res
+	return
 }
 
 // Pushes a new element into the queue from the left, expanding it if necessary.
@@ -115,15 +116,15 @@ func (d *Deque) PushLeft(data interface{}) {
 }
 
 // Pops out an element from the queue from the left. Note, no bounds checking are done.
-func (d *Deque) PopLeft() interface{} {
-	res := d.left[d.leftOff]
+func (d *Deque) PopLeft() (res interface{}) {
+	res, d.left[d.leftOff] = d.left[d.leftOff], res
 	d.leftOff++
 	if d.leftOff == blockSize {
 		d.leftOff = 0
 		d.leftIdx = (d.leftIdx + 1) % len(d.blocks)
 		d.left = d.blocks[d.leftIdx]
 	}
-	return res
+	return
 }
 
 // Checks whether the queue is empty.
