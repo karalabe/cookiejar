@@ -27,6 +27,7 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
+
 package prque
 
 // The size of a block of data
