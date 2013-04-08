@@ -83,7 +83,7 @@ func (q *Queue) Push(data interface{}) {
 
 // Pops out an element from the queue. Note, no bounds checking are done.
 func (q *Queue) Pop() (res interface{}) {
-	res, q.head[q.headOff] = q.head[q.headOff], res
+	res, q.head[q.headOff] = q.head[q.headOff], nil
 	q.headOff++
 	if q.headOff == blockSize {
 		q.headOff = 0

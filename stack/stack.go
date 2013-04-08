@@ -81,7 +81,7 @@ func (s *Stack) Pop() (res interface{}) {
 		s.offset = blockSize - 1
 		s.active = s.blocks[s.size/blockSize]
 	}
-	res, s.active[s.offset] = s.active[s.offset], res
+	res, s.active[s.offset] = s.active[s.offset], nil
 	return
 }
 

@@ -90,7 +90,7 @@ func (d *Deque) PopRight() (res interface{}) {
 		d.rightIdx = (d.rightIdx - 1 + len(d.blocks)) % len(d.blocks)
 		d.right = d.blocks[d.rightIdx]
 	}
-	res, d.right[d.rightOff] = d.right[d.rightOff], res
+	res, d.right[d.rightOff] = d.right[d.rightOff], nil
 	return
 }
 
@@ -117,7 +117,7 @@ func (d *Deque) PushLeft(data interface{}) {
 
 // Pops out an element from the queue from the left. Note, no bounds checking are done.
 func (d *Deque) PopLeft() (res interface{}) {
-	res, d.left[d.leftOff] = d.left[d.leftOff], res
+	res, d.left[d.leftOff] = d.left[d.leftOff], nil
 	d.leftOff++
 	if d.leftOff == blockSize {
 		d.leftOff = 0
