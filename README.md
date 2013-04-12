@@ -8,12 +8,10 @@ Note, this toolbox was not designed for production work. It is a work in progres
   Contents
 ------------
 
-Algorithms:
- - Work in progress
-
-Data Structures:
  - [Bag](http://godoc.org/github.com/karalabe/cookiejar/bag)
  - [Deque](http://godoc.org/github.com/karalabe/cookiejar/deque)
+ - [Graph](http://godoc.org/github.com/karalabe/cookiejar/graph)
+     - [Depth First Search](http://godoc.org/github.com/karalabe/cookiejar/graph/dfs)
  - [Priority Queue](http://godoc.org/github.com/karalabe/cookiejar/prque)
  - [Queue](http://godoc.org/github.com/karalabe/cookiejar/queue)
  - [Set](http://godoc.org/github.com/karalabe/cookiejar/set)
