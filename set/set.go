@@ -54,6 +54,11 @@ func (s *Set) Remove(val interface{}) {
 	delete(s.data, val)
 }
 
+// Returns the number of elements in the set.
+func (s *Set) Size() int {
+	return len(s.data)
+}
+
 // Checks whether an element is inside the set.
 func (s *Set) Exists(val interface{}) bool {
 	_, ok := s.data[val]

@@ -36,7 +36,7 @@ import (
 
 func TestSet(t *testing.T) {
 	// Create some initial data
-	size := 1048576
+	size := 65536
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()

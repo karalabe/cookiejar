@@ -36,7 +36,7 @@ import (
 
 func TestBag(t *testing.T) {
 	// Create some initial data
-	size := 1048576
+	size := 65536
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()
@@ -48,6 +48,10 @@ func TestBag(t *testing.T) {
 		if i%2 == 0 {
 			bag.Remove(data[i])
 		}
+	}
+	// Make sure size works
+	if bag.Size() != size/2 {
+		t.Errorf("size mismatch: have %v, want %v", bag.Size(), size/2)
 	}
 	// Calculate the sum of the elements in and out
 	sumBag := int64(0)
@@ -68,14 +72,14 @@ func TestBag(t *testing.T) {
 		}
 		bag.Remove(data[i])
 	}
-	if len(bag.data) != 0 {
+	if len(bag.data) != 0 || bag.Size() != 0 {
 		t.Errorf("leftovers remained in bag: %v", bag)
 	}
 }
 
 func TestReset(t *testing.T) {
 	// Create some initial data
-	size := 1048576
+	size := 65536
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()
@@ -87,7 +91,7 @@ func TestReset(t *testing.T) {
 	}
 	// clear the bag and verify
 	bag.Reset()
-	if len(bag.data) != 0 {
+	if len(bag.data) != 0 || bag.Size() != 0 {
 		t.Errorf("leftovers remained in bag: %v", bag)
 	}
 }
