@@ -53,6 +53,9 @@ func TestStack(t *testing.T) {
 			if i%2 == 0 {
 				secs = append(secs, stack.Pop().(int))
 			}
+			if stack.Size() != (i+1)/2 {
+				t.Errorf("stack size mismatch: have %v, want %v.", stack.Size(), (i+1)/2)
+			}
 		}
 		rest := []int{}
 		for !stack.Empty() {

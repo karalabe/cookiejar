@@ -99,6 +99,11 @@ func (s *Stack) Empty() bool {
 	return s.size == 0
 }
 
+// Returns the number of elements in the stack.
+func (s *Stack) Size() int {
+	return s.size
+}
+
 // Resets the stack, effectively clearing its contents.
 func (s *Stack) Reset() {
 	s.size = 0
