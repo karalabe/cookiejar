@@ -93,9 +93,25 @@ func (q *Queue) Pop() (res interface{}) {
 	return
 }
 
+// Returns the first element in the queue. Note, no bounds checking are done.
+func (q *Queue) Front() interface{} {
+	return q.head[q.headOff]
+}
+
 // Checks whether the queue is empty.
 func (q *Queue) Empty() bool {
 	return q.headIdx == q.tailIdx && q.headOff == q.tailOff
+}
+
+// Returns the number of elements in the queue.
+func (q *Queue) Size() int {
+	if q.tailIdx > q.headIdx {
+		return (q.tailIdx-q.headIdx)*blockSize - q.headOff + q.tailOff
+	} else if q.tailIdx < q.headIdx {
+		return (len(q.blocks)-q.headIdx+q.tailIdx)*blockSize - q.headOff + q.tailOff
+	} else {
+		return q.tailOff - q.headOff
+	}
 }
 
 // Clears out the contents of the queue.

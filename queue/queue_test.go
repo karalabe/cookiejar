@@ -36,7 +36,7 @@ import (
 
 func TestQueue(t *testing.T) {
 	// Create some initial data
-	size := 1048576
+	size := 16 * blockSize
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()
@@ -49,6 +49,12 @@ func TestQueue(t *testing.T) {
 			queue.Push(data[i])
 			if i%2 == 0 {
 				outs = append(outs, queue.Pop().(int))
+				if i > 0 && queue.Front() != data[len(outs)] {
+					t.Errorf("pop/front mismatch: have %v, want %v.", queue.Front(), data[len(outs)])
+				}
+			}
+			if queue.Size() != (i+1)/2 {
+				t.Errorf("size mismatch: have %v, want %v.", queue.Size(), (i+1)/2)
 			}
 		}
 		for !queue.Empty() {
@@ -65,7 +71,7 @@ func TestQueue(t *testing.T) {
 
 func TestReset(t *testing.T) {
 	// Push some stuff into the queue
-	size := 1048576
+	size := 16 * blockSize
 	queue := New()
 	for i := 0; i < size; i++ {
 		queue.Push(i)
