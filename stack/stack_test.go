@@ -36,7 +36,7 @@ import (
 
 func TestStack(t *testing.T) {
 	// Create some initial data
-	size := 1048576
+	size := 16 * blockSize
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()
@@ -47,6 +47,9 @@ func TestStack(t *testing.T) {
 		secs := []int{}
 		for i := 0; i < size; i++ {
 			stack.Push(data[i])
+			if stack.Top() != data[i] {
+				t.Errorf("push/top mismatch: have %v, want %v.", stack.Top(), data[i])
+			}
 			if i%2 == 0 {
 				secs = append(secs, stack.Pop().(int))
 			}
@@ -69,7 +72,7 @@ func TestStack(t *testing.T) {
 
 func TestReset(t *testing.T) {
 	// Push some stuff onto the stack
-	size := 1048576
+	size := 16 * blockSize
 	stack := New()
 	for i := 0; i < size; i++ {
 		stack.Push(i)

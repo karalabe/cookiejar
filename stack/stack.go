@@ -85,6 +85,15 @@ func (s *Stack) Pop() (res interface{}) {
 	return
 }
 
+// Returns the value currently on the top of the stack. No bounds are checked.
+func (s *Stack) Top() interface{} {
+	if s.offset > 0 {
+		return s.active[s.offset-1]
+	} else {
+		return s.blocks[s.size/blockSize][blockSize-1]
+	}
+}
+
 // Checks whether the stack is empty or not.
 func (s *Stack) Empty() bool {
 	return s.size == 0
