@@ -94,6 +94,15 @@ func (d *Deque) PopRight() (res interface{}) {
 	return
 }
 
+// Returns the rightmost element from the deque. No bounds are checked.
+func (d *Deque) Right() interface{} {
+	if d.rightOff > 0 {
+		return d.right[d.rightOff-1]
+	} else {
+		return d.blocks[(d.rightIdx-1+len(d.blocks))%len(d.blocks)][blockSize-1]
+	}
+}
+
 // Pushes a new element into the queue from the left, expanding it if necessary.
 func (d *Deque) PushLeft(data interface{}) {
 	d.leftOff--
@@ -127,9 +136,25 @@ func (d *Deque) PopLeft() (res interface{}) {
 	return
 }
 
+// Returns the leftmost element from the deque. No bounds are checked.
+func (d *Deque) Left() interface{} {
+	return d.left[d.leftOff]
+}
+
 // Checks whether the queue is empty.
 func (d *Deque) Empty() bool {
 	return d.leftIdx == d.rightIdx && d.leftOff == d.rightOff
+}
+
+// Returns the number of elements in the queue.
+func (d *Deque) Size() int {
+	if d.rightIdx > d.leftIdx {
+		return (d.rightIdx-d.leftIdx)*blockSize - d.leftOff + d.rightOff
+	} else if d.rightIdx < d.leftIdx {
+		return (len(d.blocks)-d.leftIdx+d.rightIdx)*blockSize - d.leftOff + d.rightOff
+	} else {
+		return d.rightOff - d.leftOff
+	}
 }
 
 // Clears out the contents of the queue.
@@ -138,7 +163,6 @@ func (d *Deque) Reset() {
 	d.rightIdx = 0
 	d.leftOff = 0
 	d.rightOff = 0
-	d.blocks = [][]interface{}{make([]interface{}, blockSize)}
 	d.left = d.blocks[0]
 	d.right = d.blocks[0]
 }

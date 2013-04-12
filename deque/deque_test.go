@@ -36,7 +36,7 @@ import (
 
 func TestDeque(t *testing.T) {
 	// Create some initial data
-	size := 1048576
+	size := 16 * blockSize
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()
@@ -48,14 +48,24 @@ func TestDeque(t *testing.T) {
 		for i := 0; i < size; i++ {
 			if i%2 == 0 {
 				deque.PushLeft(data[i])
+				if deque.Left() != data[i] {
+					t.Errorf("push/left mismatch: have %v, want %v.", deque.Left(), data[i])
+				}
 			} else {
 				deque.PushRight(data[i])
+				if deque.Right() != data[i] {
+					t.Errorf("push/right mismatch: have %v, want %v.", deque.Right(), data[i])
+				}
 			}
 			// Pop out every third and fourth (inversely than inserted)
 			if i%4 == 2 {
 				outs = append(outs, deque.PopRight().(int))
 			} else if i%4 == 3 {
 				outs = append(outs, deque.PopLeft().(int))
+			}
+			// Make sure size is consistent
+			if deque.Size() != i/2+i%2+1-(i%4)/3 {
+				t.Errorf("size mismatch: have %v, want %v.", deque.Size(), i/2+i%2+1-(i%4)/3)
 			}
 		}
 		rest := []int{}
@@ -88,7 +98,7 @@ func TestDeque(t *testing.T) {
 
 func TestQueue(t *testing.T) {
 	// Create some initial data
-	size := 1048576
+	size := 16 * blockSize
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()
@@ -125,7 +135,7 @@ func TestQueue(t *testing.T) {
 
 func TestStack(t *testing.T) {
 	// Create some initial data
-	size := 1048576
+	size := 16 * blockSize
 	data := make([]int, size)
 	for i := 0; i < size; i++ {
 		data[i] = rand.Int()
@@ -161,16 +171,26 @@ func TestStack(t *testing.T) {
 }
 
 func TestReset(t *testing.T) {
-	// Push some stuff into the deque
-	size := 1048576
+	size := 16 * blockSize
 	deque := New()
-	for i := 0; i < size; i++ {
-		deque.PushLeft(i)
-	}
-	// Clear and verify
-	deque.Reset()
-	if !deque.Empty() {
-		t.Errorf("deque not empty after reset: %v", deque)
+	for rep := 0; rep < 2; rep++ {
+		// Push some stuff into the deque
+		for i := 0; i < size; i++ {
+			deque.PushLeft(i)
+		}
+		// Clear and verify
+		deque.Reset()
+		if !deque.Empty() {
+			t.Errorf("deque not empty after reset: %v", deque)
+		}
+		// Push again and verify
+		for i := 0; i < size; i++ {
+			deque.PushLeft(i)
+			if deque.Right() != i {
+				t.Errorf("corrupt state after reset: have %v, want %v.", deque.Right(), i)
+			}
+			deque.PopRight()
+		}
 	}
 }
 
