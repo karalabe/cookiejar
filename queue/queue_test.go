@@ -70,16 +70,28 @@ func TestQueue(t *testing.T) {
 }
 
 func TestReset(t *testing.T) {
-	// Push some stuff into the queue
 	size := 16 * blockSize
 	queue := New()
-	for i := 0; i < size; i++ {
-		queue.Push(i)
-	}
-	// Clear and verify
-	queue.Reset()
-	if !queue.Empty() {
-		t.Errorf("queue not empty after reset: %v", queue)
+	for rep := 0; rep < 2; rep++ {
+		// Push some stuff into the queue
+		for i := 0; i < size; i++ {
+			queue.Push(i)
+		}
+		// Clear and verify
+		queue.Reset()
+		if !queue.Empty() {
+			t.Errorf("queue not empty after reset: %v", queue)
+		}
+		// Push some stuff into the queue and verify
+		for i := 0; i < size; i++ {
+			queue.Push(i)
+		}
+		for i := 0; i < size; i++ {
+			if queue.Front() != i {
+				t.Errorf("corrupt state after reset: have %v, want %v.", queue.Front(), i)
+			}
+			queue.Pop()
+		}
 	}
 }
 

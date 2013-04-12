@@ -120,7 +120,6 @@ func (q *Queue) Reset() {
 	q.tailIdx = 0
 	q.headOff = 0
 	q.tailOff = 0
-	q.blocks = [][]interface{}{make([]interface{}, blockSize)}
 	q.head = q.blocks[0]
 	q.tail = q.blocks[0]
 }
