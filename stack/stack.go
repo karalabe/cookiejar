@@ -90,7 +90,7 @@ func (s *Stack) Top() interface{} {
 	if s.offset > 0 {
 		return s.active[s.offset-1]
 	} else {
-		return s.blocks[s.size/blockSize][blockSize-1]
+		return s.blocks[(s.size-1)/blockSize][blockSize-1]
 	}
 }
 
@@ -103,6 +103,6 @@ func (s *Stack) Empty() bool {
 func (s *Stack) Reset() {
 	s.size = 0
 	s.offset = 0
-	s.blocks = [][]interface{}{s.active}
+	s.active = s.blocks[0]
 	s.capacity = blockSize
 }

@@ -71,16 +71,28 @@ func TestStack(t *testing.T) {
 }
 
 func TestReset(t *testing.T) {
-	// Push some stuff onto the stack
 	size := 16 * blockSize
 	stack := New()
-	for i := 0; i < size; i++ {
-		stack.Push(i)
-	}
-	// Clear and verify
-	stack.Reset()
-	if !stack.Empty() {
-		t.Errorf("stack not empty after reset: %v", stack)
+	for rep := 0; rep < 2; rep++ {
+		// Push some stuff onto the stack
+		for i := 0; i < size; i++ {
+			stack.Push(i)
+		}
+		// Clear and verify
+		stack.Reset()
+		if !stack.Empty() {
+			t.Errorf("stack not empty after reset: %v.", stack)
+		}
+		// Push some stuff onto the stack and verify
+		for i := 0; i < size; i++ {
+			stack.Push(i)
+		}
+		for i := size - 1; i >= 0; i-- {
+			if stack.Top() != i {
+				t.Errorf("corrupt state after reset: have %v, want %v.", stack.Top(), i)
+			}
+			stack.Pop()
+		}
 	}
 }
 
