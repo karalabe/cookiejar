@@ -72,6 +72,11 @@ func (p *Prque) Empty() bool {
 	return p.cont.Len() == 0
 }
 
+// Returns the number of element in the priority queue.
+func (p *Prque) Size() int {
+	return p.cont.Len()
+}
+
 // Clears the contents of the priority queue.
 func (p *Prque) Reset() {
 	p.cont.Reset()

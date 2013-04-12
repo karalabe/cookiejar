@@ -111,6 +111,6 @@ func (s *sstack) Swap(i, j int) {
 func (s *sstack) Reset() {
 	s.size = 0
 	s.offset = 0
-	s.blocks = [][]*item{s.active}
+	s.active = s.blocks[0]
 	s.capacity = blockSize
 }

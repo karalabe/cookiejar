@@ -47,6 +47,9 @@ func TestPrque(t *testing.T) {
 		// Fill a priority queue with the above data
 		for i := 0; i < size; i++ {
 			queue.Push(data[i], float32(prio[i]))
+			if queue.Size() != i+1 {
+				t.Errorf("queue size mismatch: have %v, want %v.", queue.Size(), i+1)
+			}
 		}
 		// Create a map the values to the priorities for easier verification
 		dict := make(map[float32]int)
