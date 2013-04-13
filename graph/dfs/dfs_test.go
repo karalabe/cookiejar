@@ -16,10 +16,10 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
-package graph
+package dfs
 
 import (
-	"sort"
+	"github.com/karalabe/cookiejar/graph"
 	"testing"
 )
 
@@ -99,40 +99,135 @@ var graphTests = []graphTest{
 			{},
 		},
 	},
+	// Random Erdos-Renyi graph with 64 nodes and 0.1 conenction probability.
+	{
+		64,
+		[][]int{
+			{38, 40, 12, 61, 47, 17, 57, 28, 29},
+			{5, 15, 22, 24, 26, 47, 28, 63},
+			{33, 4, 40, 13, 15, 17, 25, 27, 62},
+			{17, 4, 6, 49},
+			{5, 20, 23, 27, 37},
+			{32, 18, 20, 56, 57},
+			{9, 55},
+			{34, 63, 13, 21},
+			{37, 60, 14, 47, 17, 52, 53, 28},
+			{56, 45},
+			{43, 58, 19, 63},
+			{36, 42, 13, 14, 16, 46, 22, 56},
+			{40, 30, 23},
+			{40, 41, 45, 46, 56},
+			{47, 50, 51, 22, 26},
+			{37, 44, 45, 25, 26},
+			{32, 49, 51, 22, 56},
+			{36, 45, 47, 52, 56},
+			{39, 43, 58, 60, 62},
+			{57},
+			{47, 56, 24, 61},
+			{32, 49, 55},
+			{34, 33, 47, 55, 39, 62, 63},
+			{40, 44, 25, 60, 63},
+			{38, 39, 46, 54, 57, 30},
+			{35, 41, 45, 34, 52},
+			{38, 39, 45, 27},
+			{42},
+			{33, 39, 40, 47, 51, 55, 60},
+			{50, 63, 39},
+			{36, 43, 57},
+			{34, 35, 40, 42, 52, 53, 57},
+			{34, 36, 50, 56},
+			{36, 39, 44, 55},
+			{38, 51},
+			{47},
+			{51, 55},
+			{61},
+			{48},
+			{41, 44, 52},
+			{60, 50},
+			{48, 49, 50, 59},
+			{46},
+			{45, 47, 53, 61, 63},
+			{55, 58, 61},
+			{49, 48, 57},
+			{58},
+			{49, 55},
+			{50, 51},
+			{},
+			{},
+			{52, 53, 58},
+			{57},
+			{63, 59, 61},
+			{56, 59},
+			{61, 62},
+			{},
+			{},
+			{62},
+			{60, 63},
+			{},
+			{},
+			{},
+			{},
+		},
+	},
 }
 
-func TestGraph(t *testing.T) {
+func TestDFS(t *testing.T) {
 	for i, tt := range graphTests {
 		// Assemble the graph
-		graph := New(tt.nodes)
+		g := graph.New(tt.nodes)
 		for v, peers := range tt.edges {
 			for _, peer := range peers {
-				graph.Connect(v, peer)
+				g.Connect(v, peer)
 			}
 		}
-		// Check basic properties
-		if graph.Vertices() != tt.nodes {
-			t.Errorf("test %d: vertex count mismatch: have %v, want %v.", i, graph.Vertices(), tt.nodes)
-		}
-		for v := 0; v < graph.Vertices(); v++ {
-			// Collect the bigger neighbors
-			peers := []int{}
-			graph.Do(v, func(vertex interface{}) {
-				if v < vertex.(int) {
-					peers = append(peers, vertex.(int))
-				}
-			})
-			// Sort due to undefined ordering
-			sort.Sort(sort.IntSlice(tt.edges[v]))
-			sort.Sort(sort.IntSlice(peers))
+		// Create a DFS structure and verify it
+		for src := 0; src < tt.nodes; src++ {
+			d := New(g, src)
 
-			// Ensure results are the same as input
-			if len(peers) != len(tt.edges[v]) {
-				t.Errorf("test %d: neighbor set size mismatch: have %v, want %v.", i, len(peers), len(tt.edges[v]))
-			} else {
-				for j := 0; j < len(peers); j++ {
-					if peers[j] != tt.edges[v][j] {
-						t.Errorf("test %d: neighbor mismatch: have %v, want %v.", i, peers[j], tt.edges[v][j])
+			// Ensure that paths are indeed connected links
+			for dst := 0; dst < tt.nodes; dst++ {
+				if d.Reachable(dst) {
+					// If reachable, generate the path and verify each link
+					if path := d.Path(dst); path == nil {
+						t.Errorf("test %d: reachable nil path %v->%v.", i, src, dst)
+					} else {
+						for p := 1; p < len(path); p++ {
+							a := path[p-1]
+							b := path[p]
+							if a > b {
+								a, b = b, a
+							}
+							found := false
+							for _, v := range tt.edges[a] {
+								if v == b {
+									found = true
+									break
+								}
+							}
+							if !found {
+								t.Errorf("test %d: path link %v-%v not found.", i, a, b)
+							}
+						}
+					}
+				} else {
+					// If not reachable, make sure path is also nil
+					if path := d.Path(dst); path != nil {
+						t.Errorf("test %d: non reachable path %v->%v: have %v, want %v.", i, src, dst, path, nil)
+					}
+				}
+			}
+			// Ensure that the order is consistent with the paths returned
+			ord := d.Order()
+			for dst := 0; dst < tt.nodes; dst++ {
+				if d.Reachable(dst) {
+					path := d.Path(dst)
+					for oi, pi := 0, 0; pi < len(path); pi++ {
+						for ord[oi] != path[pi] {
+							if oi >= len(ord) {
+								t.Errorf("test %d: order/path mismatch: o=%v, p=%v.", i, ord, path)
+							}
+							oi++
+						}
 					}
 				}
 			}
