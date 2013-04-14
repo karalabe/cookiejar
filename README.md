@@ -47,18 +47,16 @@ Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz:
     - BenchmarkPop       6.45    ns/op
 ```
 
-
   Complexity
-______________
+--------------
 
-| Algorithm | Time complexity           | Space complexity         |
-|:---------:|:-------------------------:|:------------------------:|
-| graph/bfs | C<sub>time</sub>=O(\|E\|) | C<sub>mem</sub>=O(\|V\|) |
-| graph/dfs | C<sub>time</sub>=O(\|E\|) | C<sub>mem</sub>=O(\|E\|) |
-
+| Algorithm | Time complexity       | Space complexity     |
+|:---------:|:---------------------:|:--------------------:|
+| graph/bfs | C<sub>time</sub>=O(E) | C<sub>mem</sub>=O(V) |
+| graph/dfs | C<sub>time</sub>=O(E) | C<sub>mem</sub>=O(E) |
 
   Here be dragons
-___________________
+-------------------
 
 ```
      .     _///_,
