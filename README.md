@@ -50,13 +50,13 @@ Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz:
   Complexity
 --------------
 
-| Algorithm | Time complexity       | Space complexity     |
-|:---------:|:---------------------:|:--------------------:|
-| graph/bfs | C<sub>time</sub>=O(E) | C<sub>mem</sub>=O(V) |
-| graph/dfs | C<sub>time</sub>=O(E) | C<sub>mem</sub>=O(E) |
+| Algorithm | Time complexity | Space complexity |
+|:---------:|:---------------:|:----------------:|
+| graph/bfs | O(E)            | O(V)             |
+| graph/dfs | O(E)            | O(E)             |
 
-  Here be dragons
--------------------
+  Here be dragons :)
+----------------------
 
 ```
      .     _///_,
