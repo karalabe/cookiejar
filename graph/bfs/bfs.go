@@ -17,23 +17,24 @@
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
 
-// Package dfs implements the depth-first-search algorithm for the graphs.
+// Package bfs implements the breadth-first-search algorithm for the graphs.
 //
-// The DFS is implemented using on demand calculations, meaning that only that
+// The BFS is implemented using on demand calculations, meaning that only that
 // part of the search space will be expanded as requested, iteratively expanding
 // it if needed.
 //
 // Neighbor traversal order currently is random due to the graph implementation.
 // Specific order may be added in the future.
-package dfs
+package bfs
 
 import (
 	"github.com/karalabe/cookiejar/graph"
+	"github.com/karalabe/cookiejar/queue"
 	"github.com/karalabe/cookiejar/stack"
 )
 
-// Depth-first-search algorithm data structure.
-type Dfs struct {
+// Breadth-first-search algorithm data structure.
+type Bfs struct {
 	graph  *graph.Graph
 	source int
 
@@ -41,22 +42,24 @@ type Dfs struct {
 	parents []int
 	order   []int
 
-	pending *stack.Stack
+	pending *queue.Queue
 	builder *stack.Stack
 }
 
-// Creates a new random-order dfs structure.
-func New(g *graph.Graph, src int) *Dfs {
-	d := new(Dfs)
+// Creates a new random-order bfs structure.
+func New(g *graph.Graph, src int) *Bfs {
+	d := new(Bfs)
 
 	d.graph = g
 	d.source = src
 
 	d.visited = make([]bool, g.Vertices())
+	d.visited[src] = true
 	d.parents = make([]int, g.Vertices())
-	d.order = make([]int, 0, g.Vertices())
+	d.order = make([]int, 1, g.Vertices())
+	d.order[0] = src
 
-	d.pending = stack.New()
+	d.pending = queue.New()
 	d.pending.Push(src)
 	d.builder = stack.New()
 
@@ -64,7 +67,7 @@ func New(g *graph.Graph, src int) *Dfs {
 }
 
 // Generates the path from the source node to the destination.
-func (d *Dfs) Path(dst int) []int {
+func (d *Bfs) Path(dst int) []int {
 	// If not found yet, but processing's not done, search
 	if !d.visited[dst] && !d.pending.Empty() {
 		d.search(dst)
@@ -88,7 +91,7 @@ func (d *Dfs) Path(dst int) []int {
 }
 
 // Checks whether a given vertex is reachable from the source.
-func (d *Dfs) Reachable(dst int) bool {
+func (d *Bfs) Reachable(dst int) bool {
 	if !d.visited[dst] && !d.pending.Empty() {
 		d.search(dst)
 	}
@@ -96,30 +99,27 @@ func (d *Dfs) Reachable(dst int) bool {
 }
 
 // Generates the full order in which nodes were traversed.
-func (d *Dfs) Order() []int {
-	// Force dfs termination
+func (d *Bfs) Order() []int {
+	// Force bfs termination
 	if !d.pending.Empty() {
 		d.search(-1)
 	}
 	return d.order
 }
 
-// Continues the DFS search from the last yield point, looking for dst.
-func (d *Dfs) search(dst int) {
+// Continues the bfs search from the last yield point, looking for dst.
+func (d *Bfs) search(dst int) {
 	for !d.pending.Empty() {
 		// Fetch the next node, and visit if new
 		src := d.pending.Pop().(int)
-		if !d.visited[src] {
-			d.visited[src] = true
-			d.order = append(d.order, src)
-
-			d.graph.Do(src, func(peer interface{}) {
-				if p := peer.(int); !d.visited[p] {
-					d.parents[p] = src
-					d.pending.Push(p)
-				}
-			})
-		}
+		d.graph.Do(src, func(peer interface{}) {
+			if p := peer.(int); !d.visited[p] {
+				d.visited[p] = true
+				d.order = append(d.order, p)
+				d.parents[p] = src
+				d.pending.Push(p)
+			}
+		})
 		// If we found the destination, yield
 		if dst == src {
 			return
