@@ -27,44 +27,46 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
-package sortext_test
+package sortext
 
 import (
-	"fmt"
-	"github.com/karalabe/cookiejar/exts/sortext"
-	"math/big"
 	"sort"
+	"testing"
 )
 
-func ExampleBigInts() {
-	// Define some sample big ints
-	one := big.NewInt(1)
-	two := big.NewInt(2)
-	three := big.NewInt(3)
-	four := big.NewInt(4)
-	five := big.NewInt(5)
-	six := big.NewInt(6)
-
-	// Sort and print a random slice
-	s := []*big.Int{five, two, six, three, one, four}
-	sortext.BigInts(s)
-	fmt.Println(s)
-
-	// Output:
-	// [1 2 3 4 5 6]
+type uniqueTest struct {
+	data []int
+	num  int
 }
 
-func ExampleUnique() {
-	// Create some array of data
-	data := []int{1, 5, 4, 3, 1, 3, 2, 5, 4, 3, 3, 0, 0}
+var uniqueTests = []uniqueTest{
+	{[]int{}, 0},
+	{[]int{1}, 1},
+	{
+		[]int{
+			1,
+			2, 2,
+			3, 3, 3,
+			4, 4, 4, 4,
+			5, 5, 5, 5, 5,
+			6, 6, 6, 6, 6, 6,
+		},
+		6,
+	},
+}
 
-	// Sort it
-	sort.Ints(data)
-
-	// Get unique elements and siplay them
-	n := sortext.Unique(sort.IntSlice(data))
-	fmt.Println("Uniques:", data[:n])
-
-	// Output:
-	// Uniques: [0 1 2 3 4 5]
+func TestUnique(t *testing.T) {
+	for i, tt := range uniqueTests {
+		n := Unique(sort.IntSlice(tt.data))
+		if n != tt.num {
+			t.Errorf("test %d: unique count mismatch: have %v, want %v.", i, n, tt.num)
+		}
+		for j := 0; j < n; j++ {
+			for k := j + 1; k < n; k++ {
+				if tt.data[j] >= tt.data[k] {
+					t.Errorf("test %d: uniqueness violation: (%d, %d) in %v.", i, j, k, tt.data[:n])
+				}
+			}
+		}
+	}
 }

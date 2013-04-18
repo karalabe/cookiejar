@@ -27,44 +27,26 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
-package sortext_test
+package sortext
 
 import (
-	"fmt"
-	"github.com/karalabe/cookiejar/exts/sortext"
-	"math/big"
 	"sort"
 )
 
-func ExampleBigInts() {
-	// Define some sample big ints
-	one := big.NewInt(1)
-	two := big.NewInt(2)
-	three := big.NewInt(3)
-	four := big.NewInt(4)
-	five := big.NewInt(5)
-	six := big.NewInt(6)
-
-	// Sort and print a random slice
-	s := []*big.Int{five, two, six, three, one, four}
-	sortext.BigInts(s)
-	fmt.Println(s)
-
-	// Output:
-	// [1 2 3 4 5 6]
-}
-
-func ExampleUnique() {
-	// Create some array of data
-	data := []int{1, 5, 4, 3, 1, 3, 2, 5, 4, 3, 3, 0, 0}
-
-	// Sort it
-	sort.Ints(data)
-
-	// Get unique elements and siplay them
-	n := sortext.Unique(sort.IntSlice(data))
-	fmt.Println("Uniques:", data[:n])
-
-	// Output:
-	// Uniques: [0 1 2 3 4 5]
+// Unique gathers the first occurance of each element to the front, returning
+// their number. Data must be sorted in ascending order. The order of the rest
+// is ruined.
+func Unique(data sort.Interface) int {
+	n, u, i := data.Len(), 0, 1
+	if n < 2 {
+		return n
+	}
+	for i < n {
+		if data.Less(u, i) {
+			u++
+			data.Swap(u, i)
+		}
+		i++
+	}
+	return u + 1
 }

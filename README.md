@@ -27,6 +27,7 @@ Extensions:
      - Min & Max for int and *big.Int/Rat
  - [sort](http://godoc.org/github.com/karalabe/cookiejar/exts/sortext)
      - Sort and Search for *big.Int/Rat
+     - Unique for any sort.Interface
  
 Below are the performance results for the data structures and the complexity analysis for the algorithms.
 
