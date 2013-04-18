@@ -1,26 +1,32 @@
   CookieJar - A contestant's algorithm toolbox (go)
 =====================================================
 
-CookieJar is a small collection of common algorithms and data structures that were deemed handy for computing competitions at one point or another. The goal of the toolbox is twofold: to provide some constructs out of the box and as a reference collection of the things one should know.
+CookieJar is a small collection of common algorithms, data structures and library extensions that were deemed handy for computing competitions at one point or another.
 
-Note, this toolbox is a work in progress for the time being. It may be lacking, and it may change drastically between commits (although every effort is made not to). You're welcome to use it, but it's your head on the line :)
+This toolbox is a work in progress for the time being. It may be lacking, and it may change drastically between commits (although every effort is made not to). You're welcome to use it, but it's your head on the line :)
 
   Contents
 ------------
+
+Algorithms:
+ - Graph
+     - [Breadth First Search](http://godoc.org/github.com/karalabe/cookiejar/graph/bfs)
+     - [Depth First Search](http://godoc.org/github.com/karalabe/cookiejar/graph/dfs)
 
 Data structures:
  - [Bag](http://godoc.org/github.com/karalabe/cookiejar/bag)
  - [Deque](http://godoc.org/github.com/karalabe/cookiejar/deque)
  - [Graph](http://godoc.org/github.com/karalabe/cookiejar/graph)
-     - [Breadth First Search](http://godoc.org/github.com/karalabe/cookiejar/graph/bfs)
-     - [Depth First Search](http://godoc.org/github.com/karalabe/cookiejar/graph/dfs)
  - [Priority Queue](http://godoc.org/github.com/karalabe/cookiejar/prque)
  - [Queue](http://godoc.org/github.com/karalabe/cookiejar/queue)
  - [Set](http://godoc.org/github.com/karalabe/cookiejar/set)
  - [Stack](http://godoc.org/github.com/karalabe/cookiejar/stack)
  
 Extensions:
- - [Sort & Search for *big.Int/Rat](http://godoc.org/github.com/karalabe/cookiejar/exts/sortext)
+ - [math](http://godoc.org/github.com/karalabe/cookiejar/exts/mathext)
+     - Min & Max for int and *big.Int/Rat
+ - [sort](http://godoc.org/github.com/karalabe/cookiejar/exts/sortext)
+     - Sort and Search for *big.Int/Rat
  
 Below are the performance results for the data structures and the complexity analysis for the algorithms.
 
