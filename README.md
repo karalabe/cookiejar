@@ -8,6 +8,7 @@ Note, this toolbox is a work in progress for the time being. It may be lacking, 
   Contents
 ------------
 
+Data structures:
  - [Bag](http://godoc.org/github.com/karalabe/cookiejar/bag)
  - [Deque](http://godoc.org/github.com/karalabe/cookiejar/deque)
  - [Graph](http://godoc.org/github.com/karalabe/cookiejar/graph)
@@ -17,6 +18,9 @@ Note, this toolbox is a work in progress for the time being. It may be lacking, 
  - [Queue](http://godoc.org/github.com/karalabe/cookiejar/queue)
  - [Set](http://godoc.org/github.com/karalabe/cookiejar/set)
  - [Stack](http://godoc.org/github.com/karalabe/cookiejar/stack)
+ 
+Extensions:
+ - [Sort & Search for *big.Int/Rat](http://godoc.org/github.com/karalabe/cookiejar/exts/sortext)
  
 Below are the performance results for the data structures and the complexity analysis for the algorithms.
 
