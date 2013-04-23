@@ -1,0 +1,117 @@
+// CookieJar - A contestant's algorithm toolbox
+// Copyright (c) 2013 Peter Szilagyi. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//     * Redistributions of source code must retain the above copyright notice,
+//       this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+// Alternatively, the CookieJar toolbox may be used in accordance with the terms
+// and conditions contained in a signed written agreement between you and the
+// author(s).
+//
+// Author: peterke@gmail.com (Peter Szilagyi)
+
+package geom
+
+import (
+	"math"
+	"testing"
+)
+
+var nan = math.NaN()
+
+type line2DTest struct {
+	line  *Line2
+	same  *Line2
+	horiz bool
+	vert  bool
+	slope float64
+	intX  float64
+	intY  float64
+	x1    float64
+	y1    float64
+	x2    float64
+	y2    float64
+}
+
+var line2DTests = []line2DTest{
+	// Variations crossing (-2, 0) and (0, 2)
+	{new(Line2).SetCanon(1, -1, 2), new(Line2).SetCanon(1, -1, 2), false, false, 1, -2, 2, -1, 1, -1, 1},
+	{new(Line2).SetCanon(1, -1, 2), new(Line2).SetCanon(2, -2, 4), false, false, 1, -2, 2, -1, 1, -1, 1},
+	{new(Line2).SetCanon(1, -1, 2), new(Line2).SetSlope(1, 2), false, false, 1, -2, 2, -1, 1, -1, 1},
+	{new(Line2).SetCanon(1, -1, 2), new(Line2).SetPoint(&Point2{-3, -1}, &Point2{1, 3}), false, false, 1, -2, 2, -1, 1, -1, 1},
+
+	// Variations crossing (0, 2) and (2, 0)
+	{new(Line2).SetCanon(1, 1, -2), new(Line2).SetCanon(1, 1, -2), false, false, -1, 2, 2, 1, 1, 1, 1},
+	{new(Line2).SetCanon(1, 1, -2), new(Line2).SetCanon(2, 2, -4), false, false, -1, 2, 2, 1, 1, 1, 1},
+	{new(Line2).SetCanon(1, 1, -2), new(Line2).SetSlope(-1, 2), false, false, -1, 2, 2, 1, 1, 1, 1},
+	{new(Line2).SetCanon(1, 1, -2), new(Line2).SetPoint(&Point2{-1, 3}, &Point2{1, 1}), false, false, -1, 2, 2, 1, 1, 1, 1},
+
+	// Horizontal variations
+	{new(Line2).SetCanon(0, 1, 0), new(Line2).SetCanon(0, 1, 0), true, false, 0, nan, 0, 0, 0, nan, 0},
+	{new(Line2).SetCanon(0, 1, 0), new(Line2).SetCanon(0, 2, 0), true, false, 0, nan, 0, 0, 0, nan, 0},
+	{new(Line2).SetCanon(0, 1, 0), new(Line2).SetSlope(0, 0), true, false, 0, nan, 0, 0, 0, nan, 0},
+	{new(Line2).SetCanon(0, 1, 0), new(Line2).SetPoint(&Point2{-1, 0}, &Point2{1, 0}), true, false, 0, nan, 0, 0, 0, nan, 0},
+
+	// Vertical variations
+	{new(Line2).SetCanon(1, 0, 0), new(Line2).SetCanon(1, 0, 0), false, true, nan, 0, nan, 0, nan, 0, 0},
+	{new(Line2).SetCanon(1, 0, 0), new(Line2).SetCanon(2, 0, 0), false, true, nan, 0, nan, 0, nan, 0, 0},
+	{new(Line2).SetCanon(1, 0, 0), new(Line2).SetPoint(&Point2{0, -1}, &Point2{0, 1}), false, true, nan, 0, nan, 0, nan, 0, 0},
+}
+
+// Slightly modified comparer to allow NaN-NaN comaprisons
+func equal(a, b float64) bool {
+	if math.IsNaN(a) && math.IsNaN(b) {
+		return true
+	}
+	if !math.IsNaN(a) && !math.IsNaN(b) {
+		return math.Abs(a-b) < eps
+	}
+	return false
+}
+
+func TestLine2D(t *testing.T) {
+	for i, tt := range line2DTests {
+		if !tt.line.Equal(tt.same) {
+			t.Errorf("test %d: equality mismatch: %v and %v.", i, tt.line, tt.same)
+		}
+		if res := tt.line.Horizontal(); res != tt.horiz {
+			t.Errorf("test %d: failed horizontality check: have %v, want %v.", i, res, tt.horiz)
+		}
+		if res := tt.line.Vertical(); res != tt.vert {
+			t.Errorf("test %d: failed verticality check: have %v, want %v.", i, res, tt.horiz)
+		}
+		if res := tt.line.Slope(); !equal(res, tt.slope) {
+			t.Errorf("test %d: slope mismatch: have %v, want %v.", i, res, tt.slope)
+		}
+		if res := tt.line.InterceptX(); !equal(res, tt.intX) {
+			t.Errorf("test %d: x intercept mismatch: have %v, want %v.", i, res, tt.intX)
+		}
+		if res := tt.line.InterceptY(); !equal(res, tt.intY) {
+			t.Errorf("test %d: y intercept mismatch: have %v, want %v.", i, res, tt.intY)
+		}
+		if res := tt.line.Y(tt.x1); !equal(res, tt.y1) {
+			t.Errorf("test %d: image mismatch: have %v, want %v.", i, res, tt.y1)
+		}
+		if res := tt.line.X(tt.y2); !equal(res, tt.x2) {
+			t.Errorf("test %d: point mismatch: have %v, want %v.", i, res, tt.x2)
+		}
+	}
+}
