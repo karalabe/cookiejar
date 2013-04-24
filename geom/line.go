@@ -42,6 +42,9 @@ type Line2 struct {
 
 // Allocates and returns a new 2D line in canonical form.
 func NewLine2(a, b, c float64) *Line2 {
+	if a == 0 && b == 0 {
+		panic(fmt.Sprintf("coefficients a and b simultaneously 0"))
+	}
 	return &Line2{a, b, c}
 }
 
@@ -127,5 +130,29 @@ func (x *Line2) Equal(y *Line2) bool {
 		return x.X(0) == y.X(0)
 	default:
 		return math.Abs(x.A/y.A-x.B/y.B) < eps && ((x.C == 0 && y.C == 0) || math.Abs(x.B/y.B-x.C/y.C) < eps)
+	}
+}
+
+// Returns whether two lines are parallel.
+func (x *Line2) Parallel(y *Line2) bool {
+	return math.Abs(x.A*y.B-y.A*x.B) < eps
+}
+
+// Returns whether two lines are perpendicular.
+func (x *Line2) Perpendicular(y *Line2) bool {
+	if x.Parallel(y) {
+		return false
+	} else if (x.Horizontal() && y.Vertical()) || (y.Horizontal() && x.Vertical()) {
+		return true
+	}
+	return math.Abs(x.Slope()*y.Slope()+1) < eps
+}
+
+// Calculates the intersetion point of two lines, or returns nil if they are parallel.
+func (x *Line2) Intersect(y *Line2) *Point2 {
+	if den := x.A*y.B - y.A*x.B; math.Abs(den) < eps {
+		return nil
+	} else {
+		return &Point2{(x.B*y.C - y.B*x.C) / den, (y.A*x.C - x.A*y.C) / den}
 	}
 }

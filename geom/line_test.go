@@ -76,6 +76,34 @@ var line2DTests = []line2DTest{
 	{new(Line2).SetCanon(1, 0, 0), new(Line2).SetPoint(&Point2{0, -1}, &Point2{0, 1}), false, true, nan, 0, nan, 0, nan, 0, 0},
 }
 
+type intersect2DTest struct {
+	l1    *Line2
+	l2    *Line2
+	par   bool
+	per   bool
+	cross *Point2
+}
+
+var intersect2DTests = []intersect2DTest{
+	// Parallel lines (horizontal, vertical, diagonals)
+	{new(Line2).SetCanon(0, 1, 0), new(Line2).SetCanon(0, 1, 0), true, false, nil},
+	{new(Line2).SetCanon(0, 1, 0), new(Line2).SetCanon(0, 2, 0), true, false, nil},
+	{new(Line2).SetCanon(1, 0, 0), new(Line2).SetCanon(1, 0, 0), true, false, nil},
+	{new(Line2).SetCanon(1, 0, 0), new(Line2).SetCanon(2, 0, 0), true, false, nil},
+	{new(Line2).SetSlope(1, 0), new(Line2).SetSlope(1, 0), true, false, nil},
+	{new(Line2).SetSlope(1, 0), new(Line2).SetSlope(1, 1), true, false, nil},
+	{new(Line2).SetSlope(-1, 0), new(Line2).SetSlope(-1, 0), true, false, nil},
+	{new(Line2).SetSlope(-1, 0), new(Line2).SetSlope(-1, 1), true, false, nil},
+
+	// Perpendicular lines
+	{new(Line2).SetPoint(&Point2{-1, 0}, &Point2{1, 0}), new(Line2).SetPoint(&Point2{0, -1}, &Point2{0, 1}), false, true, &Point2{0, 0}},
+	{new(Line2).SetPoint(&Point2{1, -1}, &Point2{1, 1}), new(Line2).SetPoint(&Point2{-1, 1}, &Point2{1, 1}), false, true, &Point2{1, 1}},
+	{new(Line2).SetPoint(&Point2{1, 0}, &Point2{5, 4}), new(Line2).SetPoint(&Point2{1, 4}, &Point2{5, 0}), false, true, &Point2{3, 2}},
+
+	// Simple lines
+	{new(Line2).SetPoint(&Point2{0, 0}, &Point2{1, 1}), new(Line2).SetPoint(&Point2{0, 2}, &Point2{1, -1}), false, false, &Point2{0.5, 0.5}},
+}
+
 // Slightly modified comparer to allow NaN-NaN comaprisons
 func equal(a, b float64) bool {
 	if math.IsNaN(a) && math.IsNaN(b) {
@@ -112,6 +140,26 @@ func TestLine2D(t *testing.T) {
 		}
 		if res := tt.line.X(tt.y2); !equal(res, tt.x2) {
 			t.Errorf("test %d: point mismatch: have %v, want %v.", i, res, tt.x2)
+		}
+	}
+}
+
+func TestIntersect2D(t *testing.T) {
+	for i, tt := range intersect2DTests {
+		if res := tt.l1.Parallel(tt.l2); res != tt.par {
+			t.Errorf("test %d: parallelism mismatch: have %v, want %v.", i, res, tt.par)
+		}
+		if res := tt.l1.Perpendicular(tt.l2); res != tt.per {
+			t.Errorf("test %d: perpendicularity mismatch: have %v, want %v.", i, res, tt.per)
+		}
+		cross := tt.l1.Intersect(tt.l2)
+		switch {
+		case cross == nil && tt.cross != nil:
+			t.Errorf("test %d: intersection not found: have %v, want %v.", i, cross, tt.cross)
+		case cross != nil && tt.cross == nil:
+			t.Errorf("test %d: non-exostent intersection: have %v, want %v.", i, cross, tt.cross)
+		case cross != nil && tt.cross != nil && !cross.Equal(tt.cross):
+			t.Errorf("test %d: intersection mismatch: have %v, want %v.", i, cross, tt.cross)
 		}
 	}
 }

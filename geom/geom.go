@@ -32,4 +32,4 @@
 package geom
 
 // Epsilon value for float equality comparison.
-var eps = float64(10e-9)
+var eps = float64(1e-9)
