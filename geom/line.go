@@ -156,3 +156,21 @@ func (x *Line2) Intersect(y *Line2) *Point2 {
 		return &Point2{(x.B*y.C - y.B*x.C) / den, (y.A*x.C - x.A*y.C) / den}
 	}
 }
+
+// Calculates the delta of a point form the line (i.e. signed distance).
+func (l *Line2) Delta(p *Point2) float64 {
+	// Get the base vector for the line
+	var base *Vec2
+	if l.Vertical() {
+		base = NewVec2(0, 1)
+	} else {
+		base = new(Vec2).Sub(&Vec2{0, l.Y(0)}, &Vec2{1, l.Y(1)})
+	}
+	// Calculate cross product and height from that
+	return base.Cross(&Vec2{p.X, p.Y}) / base.Norm()
+}
+
+// Calculates the distance of a point from the line.
+func (l *Line2) Dist(p *Point2) float64 {
+	return math.Abs(l.Delta(p))
+}
