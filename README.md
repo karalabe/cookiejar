@@ -10,11 +10,11 @@ This toolbox is a work in progress for the time being. It may be lacking, and it
 
 To get the package, execute:
 
-  go get gopkg.in/karalabe/cookiejar.v1
+    go get gopkg.in/karalabe/cookiejar.v1
 
 To import this package, add the following line to your code:
 
-  import "gopkg.in/karalabe/cookiejar.v1"
+    import "gopkg.in/karalabe/cookiejar.v1"
 
 For more details, see the [package documentation](http://godoc.org/gopkg.in/karalabe/cookiejar.v1).
 
