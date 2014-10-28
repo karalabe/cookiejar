@@ -20,7 +20,7 @@ package graph_test
 
 import (
 	"fmt"
-	"github.com/karalabe/cookiejar/graph"
+	"gopkg.in/karalabe/cookiejar.v1/graph"
 )
 
 // Creates a simple graph, and prints the degree of each vertex.

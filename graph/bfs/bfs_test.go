@@ -19,7 +19,7 @@
 package bfs
 
 import (
-	"github.com/karalabe/cookiejar/graph"
+	"gopkg.in/karalabe/cookiejar.v1/graph"
 	"testing"
 )
 

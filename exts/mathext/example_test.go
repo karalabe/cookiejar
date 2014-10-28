@@ -31,7 +31,7 @@ package mathext_test
 
 import (
 	"fmt"
-	"github.com/karalabe/cookiejar/exts/mathext"
+	"gopkg.in/karalabe/cookiejar.v1/exts/mathext"
 	"math/big"
 )
 

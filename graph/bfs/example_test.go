@@ -20,8 +20,8 @@ package bfs_test
 
 import (
 	"fmt"
-	"github.com/karalabe/cookiejar/graph"
-	"github.com/karalabe/cookiejar/graph/bfs"
+	"gopkg.in/karalabe/cookiejar.v1/graph"
+	"gopkg.in/karalabe/cookiejar.v1/graph/bfs"
 )
 
 // Small API demo based on a trie graph and a few disconnected vertices.

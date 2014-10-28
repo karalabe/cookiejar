@@ -32,7 +32,7 @@ package bag_test
 import (
 	"fmt"
 
-	"github.com/karalabe/cookiejar/collections/bag"
+	"gopkg.in/karalabe/cookiejar.v1/collections/bag"
 )
 
 // Small demo of the common functions in the bag package.

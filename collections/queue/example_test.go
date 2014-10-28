@@ -32,7 +32,7 @@ package queue_test
 import (
 	"fmt"
 
-	"github.com/karalabe/cookiejar/collections/queue"
+	"gopkg.in/karalabe/cookiejar.v1/collections/queue"
 )
 
 // Simple usage example that inserts the numbers 0, 1, 2 into a queue and then

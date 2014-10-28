@@ -22,7 +22,7 @@
 package graph
 
 import (
-	"github.com/karalabe/cookiejar/collections/bag"
+	"gopkg.in/karalabe/cookiejar.v1/collections/bag"
 )
 
 // Data structure for representing a graph.

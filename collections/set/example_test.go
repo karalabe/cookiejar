@@ -32,7 +32,7 @@ package set_test
 import (
 	"fmt"
 
-	"github.com/karalabe/cookiejar/collections/set"
+	"gopkg.in/karalabe/cookiejar.v1/collections/set"
 )
 
 // Insert some numbers into a set, remove one and sum the remainder.

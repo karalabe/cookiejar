@@ -31,7 +31,7 @@ package sortext_test
 
 import (
 	"fmt"
-	"github.com/karalabe/cookiejar/exts/sortext"
+	"gopkg.in/karalabe/cookiejar.v1/exts/sortext"
 	"math/big"
 	"sort"
 )
