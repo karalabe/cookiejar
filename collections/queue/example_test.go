@@ -27,64 +27,28 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
-
-package geom
+package queue_test
 
 import (
-	"math"
+	"fmt"
+
+	"github.com/karalabe/cookiejar/collections/queue"
 )
 
-// Two dimensional point.
-type Point2 struct {
-	X, Y float64
-}
-
-// Three dimensional point.
-type Point3 struct {
-	X, Y, Z float64
-}
-
-// Allocates and returns a new 2D point.
-func NewPoint2(x, y float64) *Point2 {
-	return &Point2{x, y}
-}
-
-// Allocates and returns a new 3D point.
-func NewPoint3(x, y, z float64) *Point3 {
-	return &Point3{x, y, z}
-}
-
-// Calculates the distance between x and y.
-func (x *Point2) Dist(y *Point2) float64 {
-	return math.Sqrt(x.DistSqr(y))
-}
-
-// Calculates the distance between x and y.
-func (x *Point3) Dist(y *Point3) float64 {
-	return math.Sqrt(x.DistSqr(y))
-}
-
-// Calculates the squared distance between x and y.
-func (x *Point2) DistSqr(y *Point2) float64 {
-	dx := x.X - y.X
-	dy := x.Y - y.Y
-	return dx*dx + dy*dy
-}
-
-// Calculates the squared distance between x and y.
-func (x *Point3) DistSqr(y *Point3) float64 {
-	dx := x.X - y.X
-	dy := x.Y - y.Y
-	dz := x.Z - y.Z
-	return dx*dx + dy*dy + dz*dz
-}
-
-// Returns whether two points are equal.
-func (x *Point2) Equal(y *Point2) bool {
-	return math.Abs(x.X-y.X) < eps && math.Abs(x.Y-y.Y) < eps
-}
-
-// Returns whether two points are equal.
-func (x *Point3) Equal(y *Point3) bool {
-	return math.Abs(x.X-y.X) < eps && math.Abs(x.Y-y.Y) < eps && math.Abs(x.Z-y.Z) < eps
+// Simple usage example that inserts the numbers 0, 1, 2 into a queue and then
+// removes them one by one, printing them to the standard output.
+func Example_usage() {
+	// Create a queue an push some data in
+	q := queue.New()
+	for i := 0; i < 3; i++ {
+		q.Push(i)
+	}
+	// Pop out the queue contents and display them
+	for !q.Empty() {
+		fmt.Println(q.Pop())
+	}
+	// Output:
+	// 0
+	// 1
+	// 2
 }

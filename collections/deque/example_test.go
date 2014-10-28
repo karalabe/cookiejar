@@ -27,27 +27,28 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
-package stack_test
+package deque_test
 
 import (
 	"fmt"
-	"github.com/karalabe/cookiejar/stack"
+
+	"github.com/karalabe/cookiejar/collections/deque"
 )
 
-// Simple usage example that inserts the numbers 1, 2, 3 into a stack and then
-// removes them one by one, printing them to the standard output.
+// Simple usage example that inserts the numbers 0, 1, 2 into a deque and then
+// removes them one by one, varying the removal side.
 func Example_usage() {
-	// Create a stack and push some data in
-	s := stack.New()
+	// Create a deque an push some data in
+	d := deque.New()
 	for i := 0; i < 3; i++ {
-		s.Push(i)
+		d.PushLeft(i)
 	}
-	// Pop out the stack contents and display them
-	for !s.Empty() {
-		fmt.Println(s.Pop())
-	}
+	// Pop out the deque contents and display them
+	fmt.Println(d.PopLeft())
+	fmt.Println(d.PopRight())
+	fmt.Println(d.PopLeft())
 	// Output:
 	// 2
-	// 1
 	// 0
+	// 1
 }

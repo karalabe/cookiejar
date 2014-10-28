@@ -27,27 +27,38 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
-package queue_test
+package set_test
 
 import (
 	"fmt"
-	"github.com/karalabe/cookiejar/queue"
+
+	"github.com/karalabe/cookiejar/collections/set"
 )
 
-// Simple usage example that inserts the numbers 0, 1, 2 into a queue and then
-// removes them one by one, printing them to the standard output.
+// Insert some numbers into a set, remove one and sum the remainder.
 func Example_usage() {
-	// Create a queue an push some data in
-	q := queue.New()
-	for i := 0; i < 3; i++ {
-		q.Push(i)
+	// Create a new set and insert some data
+	s := set.New()
+	s.Insert(3.14)
+	s.Insert(1.41)
+	s.Insert(2.71)
+	s.Insert(10) // Isn't this one just ugly?
+
+	// Remove unneeded data and verify that it's gone
+	s.Remove(10)
+	if !s.Exists(10) {
+		fmt.Println("Yay, ugly 10 is no more!")
+	} else {
+		fmt.Println("Welcome To Facebook")
 	}
-	// Pop out the queue contents and display them
-	for !q.Empty() {
-		fmt.Println(q.Pop())
-	}
+	// Sum the remainder and output
+	sum := 0.0
+	s.Do(func(val interface{}) {
+		sum += val.(float64)
+	})
+	fmt.Println("Sum:", sum)
+
 	// Output:
-	// 0
-	// 1
-	// 2
+	// Yay, ugly 10 is no more!
+	// Sum: 7.26
 }

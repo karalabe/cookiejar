@@ -27,9 +27,46 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
+package bag_test
 
-// Package geom implements basic geometric types and operations on them.
-package geom
+import (
+	"fmt"
 
-// Epsilon value for float equality comparison.
-var eps = float64(1e-9)
+	"github.com/karalabe/cookiejar/collections/bag"
+)
+
+// Small demo of the common functions in the bag package.
+func Example_usage() {
+	// Create a new bag with some integers in it
+	b := bag.New()
+	for i := 0; i < 10; i++ {
+		b.Insert(i)
+	}
+	b.Insert(8)
+	// Remove every odd integer
+	for i := 1; i < 10; i += 2 {
+		b.Remove(i)
+	}
+	// Print the element count of all numbers
+	for i := 0; i < 10; i++ {
+		fmt.Printf("#%d: %d\n", i, b.Count(i))
+	}
+	// Calculate the sum with a Do iteration
+	sum := 0
+	b.Do(func(val interface{}) {
+		sum += val.(int)
+	})
+	fmt.Println("Sum:", sum)
+	// Output:
+	// #0: 1
+	// #1: 0
+	// #2: 1
+	// #3: 0
+	// #4: 1
+	// #5: 0
+	// #6: 1
+	// #7: 0
+	// #8: 2
+	// #9: 0
+	// Sum: 28
+}

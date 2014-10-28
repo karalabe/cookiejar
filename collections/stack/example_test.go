@@ -27,45 +27,28 @@
 // author(s).
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
-package bag_test
+package stack_test
 
 import (
 	"fmt"
-	"github.com/karalabe/cookiejar/bag"
+
+	"github.com/karalabe/cookiejar/collections/stack"
 )
 
-// Small demo of the common functions in the bag package.
+// Simple usage example that inserts the numbers 1, 2, 3 into a stack and then
+// removes them one by one, printing them to the standard output.
 func Example_usage() {
-	// Create a new bag with some integers in it
-	b := bag.New()
-	for i := 0; i < 10; i++ {
-		b.Insert(i)
+	// Create a stack and push some data in
+	s := stack.New()
+	for i := 0; i < 3; i++ {
+		s.Push(i)
 	}
-	b.Insert(8)
-	// Remove every odd integer
-	for i := 1; i < 10; i += 2 {
-		b.Remove(i)
+	// Pop out the stack contents and display them
+	for !s.Empty() {
+		fmt.Println(s.Pop())
 	}
-	// Print the element count of all numbers
-	for i := 0; i < 10; i++ {
-		fmt.Printf("#%d: %d\n", i, b.Count(i))
-	}
-	// Calculate the sum with a Do iteration
-	sum := 0
-	b.Do(func(val interface{}) {
-		sum += val.(int)
-	})
-	fmt.Println("Sum:", sum)
 	// Output:
-	// #0: 1
-	// #1: 0
-	// #2: 1
-	// #3: 0
-	// #4: 1
-	// #5: 0
-	// #6: 1
-	// #7: 0
-	// #8: 2
-	// #9: 0
-	// Sum: 28
+	// 2
+	// 1
+	// 0
 }

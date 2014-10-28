@@ -28,8 +28,8 @@
 package dfs
 
 import (
+	"github.com/karalabe/cookiejar/collections/stack"
 	"github.com/karalabe/cookiejar/graph"
-	"github.com/karalabe/cookiejar/stack"
 )
 
 // Depth-first-search algorithm data structure.
