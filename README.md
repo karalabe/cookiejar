@@ -5,6 +5,19 @@ CookieJar is a small collection of common algorithms, data structures and librar
 
 This toolbox is a work in progress for the time being. It may be lacking, and it may change drastically between commits (although every effort is made not to). You're welcome to use it, but it's your head on the line :)
 
+  Installation
+----------------
+
+To get the package, execute:
+
+  go get gopkg.in/karalabe/cookiejar.v1
+
+To import this package, add the following line to your code:
+
+  import "gopkg.in/karalabe/cookiejar.v1"
+
+For more details, see the [package documentation](http://godoc.org/gopkg.in/karalabe/cookiejar.v1).
+
   Contents
 ------------
 
