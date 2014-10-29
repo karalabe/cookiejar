@@ -26,6 +26,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
@@ -101,11 +102,11 @@ func dependencies(path string) (map[string][]string, error) {
 }
 
 // Parses a source file and scopes all global declarations.
-func rewrite(src string, pkg string, deps []string) (string, error) {
+func rewrite(src string, pkg string) ([]byte, error) {
 	fileSet := token.NewFileSet()
 	tree, err := parser.ParseFile(fileSet, src, nil, parser.ParseComments)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	// Scope all top level declarations if not main file
 	if pkg != "" {
@@ -113,17 +114,17 @@ func rewrite(src string, pkg string, deps []string) (string, error) {
 			switch v := decl.(type) {
 			case *ast.FuncDecl:
 				if v.Recv == nil {
-					rename(tree, v.Name.String(), pkg+"•"+v.Name.String())
+					rename(tree, v.Name.String(), pkg+"ᴥ"+v.Name.String())
 				}
 			case *ast.GenDecl:
 				for _, spec := range v.Specs {
 					switch spec := spec.(type) {
 					case *ast.ValueSpec:
 						for _, name := range spec.Names {
-							rename(tree, name.String(), pkg+"•"+name.String())
+							rename(tree, name.String(), pkg+"ᴥ"+name.String())
 						}
 					case *ast.TypeSpec:
-						rename(tree, spec.Name.String(), pkg+"•"+spec.Name.String())
+						rename(tree, spec.Name.String(), pkg+"ᴥ"+spec.Name.String())
 					default:
 						fmt.Println("Unknown spec:", spec)
 					}
@@ -138,7 +139,7 @@ func rewrite(src string, pkg string, deps []string) (string, error) {
 	for _, decl := range tree.Decls {
 		if gen, ok := decl.(*ast.GenDecl); !ok || gen.Tok != token.IMPORT {
 			if err := printer.Fprint(out, fileSet, decl); err != nil {
-				return "", err
+				return nil, err
 			}
 		}
 		fmt.Fprintf(out, "\n\n")
@@ -159,7 +160,7 @@ func rewrite(src string, pkg string, deps []string) (string, error) {
 					} else if !info.Standard {
 						// Add scope to external import
 						scoper := regexp.MustCompile("\\b" + info.Name + "\\.(.+)")
-						blob = scoper.ReplaceAll(blob, []byte(info.Name+"•$1"))
+						blob = scoper.ReplaceAll(blob, []byte(info.Name+"ᴥ$1"))
 					}
 				}
 			}
@@ -167,10 +168,9 @@ func rewrite(src string, pkg string, deps []string) (string, error) {
 		return true
 	})
 	if fail != nil {
-		return "", fail
+		return nil, fail
 	}
-	fmt.Println(string(blob))
-	return "", nil
+	return blob, nil
 }
 
 // Renames a top level declaration to something else.
@@ -231,21 +231,46 @@ func rename(tree *ast.File, old, new string) {
 	})
 }
 
+// Flattens a main file with rewritten dependencies.
+func flatten(main []byte, deps [][]byte) ([]byte, error) {
+	// Dump all code pieces into a buffer
+	buffer := new(bytes.Buffer)
+	fmt.Fprintf(buffer, "%s\n\n", main)
+	for _, dep := range deps {
+		fmt.Fprintf(buffer, "%s\n\n", dep)
+	}
+	// Format the blob to Go standards
+	blob, err := format.Source(buffer.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	return blob, nil
+}
+
 func main() {
 	deps, err := dependencies(os.Args[1])
 	if err != nil {
 		log.Fatalf("Failed to parse dependency chain: %v.", err)
 	}
-	pkgs := []string{}
-	for pkg, _ := range deps {
-		pkgs = append(pkgs, pkg)
-	}
 	// Rewrite all the dependencies
+	pieces := make([][]byte, 0, len(deps))
 	for pkg, sources := range deps {
 		for _, src := range sources {
-			fmt.Println(rewrite(src, pkg, pkgs))
+			blob, err := rewrite(src, pkg)
+			if err != nil {
+				log.Fatalf("Failed to rewrite dependency %s: %v.", src, err)
+			}
+			pieces = append(pieces, blob)
 		}
 	}
-	// Rewrite the main file itself
-	fmt.Println(rewrite(os.Args[1], "", pkgs))
+	// Rewrite the main file itself, append all dependencies
+	main, err := rewrite(os.Args[1], "")
+	if err != nil {
+		log.Fatalf("Failed to rewrite main file %s: %v.", os.Args[1], err)
+	}
+	blob, err := flatten(main, pieces)
+	if err != nil {
+		log.Fatalf("Failed to flatten and format sources: %v.", err)
+	}
+	fmt.Println(string(blob))
 }
