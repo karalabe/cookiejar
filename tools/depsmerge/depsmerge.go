@@ -27,7 +27,6 @@ import (
 	"flag"
 	"fmt"
 	"go/ast"
-	"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
@@ -38,6 +37,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"code.google.com/p/go.tools/imports"
 
 	"gopkg.in/inconshreveable/log15.v2"
 )
@@ -119,7 +120,7 @@ func declarations(paths []string) ([]*ast.Object, error) {
 		for _, decl := range tree.Decls {
 			switch decl := decl.(type) {
 			case *ast.FuncDecl:
-				if decl.Recv == nil {
+				if decl.Recv == nil && decl.Name.Name != "init" {
 					results = append(results, ast.NewObj(ast.Fun, decl.Name.String()))
 				}
 			case *ast.GenDecl:
@@ -283,8 +284,8 @@ func flatten(pkg string, main []byte, deps [][]byte) ([]byte, error) {
 	for _, dep := range deps {
 		fmt.Fprintf(buffer, "%s\n\n", dep)
 	}
-	// Format the blob to Go standards
-	blob, err := format.Source(buffer.Bytes())
+	// Format the blob to Go standards and add imports
+	blob, err := imports.Process("", buffer.Bytes(), nil)
 	if err != nil {
 		return nil, err
 	}
