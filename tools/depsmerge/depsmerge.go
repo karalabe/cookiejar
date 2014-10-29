@@ -184,7 +184,9 @@ func rename(tree *ast.File, old, new string) {
 			// If a top level function matches, rename
 			if decl.Recv == nil && decl.Name.Name == old {
 				decl.Name.Name = new
-				decl.Name.Obj.Name = new
+				if decl.Name.Obj != nil {
+					decl.Name.Obj.Name = new
+				}
 			}
 		case *ast.GenDecl:
 			// Iterate over all the generic declaration
@@ -195,13 +197,17 @@ func rename(tree *ast.File, old, new string) {
 					for _, name := range spec.Names {
 						if name.Name == old {
 							name.Name = new
-							name.Obj.Name = new
+							if name.Obj != nil {
+								name.Obj.Name = new
+							}
 						}
 					}
 				case *ast.TypeSpec:
 					if spec.Name.Name == old {
 						spec.Name.Name = new
-						spec.Name.Obj.Name = new
+						if spec.Name.Obj != nil {
+							spec.Name.Obj.Name = new
+						}
 					}
 				}
 			}
