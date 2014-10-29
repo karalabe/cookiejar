@@ -39,7 +39,6 @@ import (
 	"strings"
 
 	"code.google.com/p/go.tools/imports"
-
 	"gopkg.in/inconshreveable/log15.v2"
 )
 
