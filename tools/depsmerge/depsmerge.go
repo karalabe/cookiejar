@@ -34,6 +34,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 // Package description from the go list command
@@ -106,46 +107,67 @@ func rewrite(src string, pkg string, deps []string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// Scope all top level declarations
-	for _, decl := range tree.Decls {
-		switch v := decl.(type) {
-		case *ast.FuncDecl:
-			if v.Recv == nil {
-				rename(tree, v.Name.String(), pkg+"•"+v.Name.String())
-			}
-		case *ast.GenDecl:
-			for _, spec := range v.Specs {
-				switch spec := spec.(type) {
-				case *ast.ValueSpec:
-					for _, name := range spec.Names {
-						rename(tree, name.String(), pkg+"•"+name.String())
-					}
-				case *ast.TypeSpec:
-					src, dst := spec.Name.String(), pkg+"•"+spec.Name.String()
-					fmt.Printf("%s: Type %s -> %s\n", pkg, src, dst)
-					rename(tree, src, dst)
-				default:
-					fmt.Println("Unknown spec:", spec)
+	// Scope all top level declarations if not main file
+	if pkg != "" {
+		for _, decl := range tree.Decls {
+			switch v := decl.(type) {
+			case *ast.FuncDecl:
+				if v.Recv == nil {
+					rename(tree, v.Name.String(), pkg+"•"+v.Name.String())
 				}
+			case *ast.GenDecl:
+				for _, spec := range v.Specs {
+					switch spec := spec.(type) {
+					case *ast.ValueSpec:
+						for _, name := range spec.Names {
+							rename(tree, name.String(), pkg+"•"+name.String())
+						}
+					case *ast.TypeSpec:
+						rename(tree, spec.Name.String(), pkg+"•"+spec.Name.String())
+					default:
+						fmt.Println("Unknown spec:", spec)
+					}
+				}
+			default:
+				fmt.Println(v)
 			}
-		default:
-			fmt.Println(v)
 		}
 	}
-	// Generate the new source file
+	// Generate the new source contents
 	out := bytes.NewBuffer(nil)
 	for _, decl := range tree.Decls {
-		if err := printer.Fprint(out, fileSet, decl); err != nil {
-			return "", err
+		if gen, ok := decl.(*ast.GenDecl); !ok || gen.Tok != token.IMPORT {
+			if err := printer.Fprint(out, fileSet, decl); err != nil {
+				return "", err
+			}
 		}
 		fmt.Fprintf(out, "\n\n")
 	}
 	blob := out.Bytes()
 
-	// Dump all import statements and scope externals
-	for _, dep := range deps {
-		scoper := regexp.MustCompile("\\b" + dep + "\\.(.+)")
-		blob = scoper.ReplaceAll(blob, []byte(dep+"•$1"))
+	// Scope all externally imported dependencies
+	var fail error
+	ast.Inspect(tree, func(node ast.Node) bool {
+		if imp, ok := node.(*ast.GenDecl); ok && imp.Tok == token.IMPORT {
+			for _, spec := range imp.Specs {
+				if spec, ok := spec.(*ast.ImportSpec); ok {
+					// Figure out the correct name of the import
+					path := strings.Trim(spec.Path.Value, "\"")
+					if info, err := details(path); err != nil {
+						fail = err
+						return false
+					} else if !info.Standard {
+						// Add scope to external import
+						scoper := regexp.MustCompile("\\b" + info.Name + "\\.(.+)")
+						blob = scoper.ReplaceAll(blob, []byte(info.Name+"•$1"))
+					}
+				}
+			}
+		}
+		return true
+	})
+	if fail != nil {
+		return "", fail
 	}
 	fmt.Println(string(blob))
 	return "", nil
@@ -218,9 +240,12 @@ func main() {
 	for pkg, _ := range deps {
 		pkgs = append(pkgs, pkg)
 	}
+	// Rewrite all the dependencies
 	for pkg, sources := range deps {
 		for _, src := range sources {
-			rewrite(src, pkg, pkgs)
+			fmt.Println(rewrite(src, pkg, pkgs))
 		}
 	}
+	// Rewrite the main file itself
+	fmt.Println(rewrite(os.Args[1], "", pkgs))
 }
