@@ -250,6 +250,10 @@ func rename(tree *ast.File, old, new string) {
 			if _, ok := stack[len(stack)-2].(*ast.SelectorExpr); ok {
 				return true
 			}
+			// If member function, leave it alone
+			if _, ok := stack[len(stack)-2].(*ast.FuncDecl); ok {
+				return true
+			}
 			id.Name = new
 		}
 		if ok && id.Obj != nil && id.Name == old && id.Obj.Name == new {
