@@ -115,15 +115,17 @@ func rewrite(src string, pkg string, deps []string) (string, error) {
 			}
 		case *ast.GenDecl:
 			for _, spec := range v.Specs {
-				switch v := spec.(type) {
+				switch spec := spec.(type) {
 				case *ast.ValueSpec:
-					for _, name := range v.Names {
+					for _, name := range spec.Names {
 						rename(tree, name.String(), pkg+"•"+name.String())
 					}
 				case *ast.TypeSpec:
-					// Don't rename types (hope no conflict)
+					src, dst := spec.Name.String(), pkg+"•"+spec.Name.String()
+					fmt.Printf("%s: Type %s -> %s\n", pkg, src, dst)
+					rename(tree, src, dst)
 				default:
-					fmt.Println("Unknown spec:", v)
+					fmt.Println("Unknown spec:", spec)
 				}
 			}
 		default:
@@ -162,15 +164,20 @@ func rename(tree *ast.File, old, new string) {
 			}
 		case *ast.GenDecl:
 			// Iterate over all the generic declaration
-			for _, s := range decl.Specs {
-				switch s := s.(type) {
+			for _, spec := range decl.Specs {
+				switch spec := spec.(type) {
 				case *ast.ValueSpec:
 					// If a top level variable matches, rename
-					for _, name := range s.Names {
+					for _, name := range spec.Names {
 						if name.Name == old {
 							name.Name = new
 							name.Obj.Name = new
 						}
+					}
+				case *ast.TypeSpec:
+					if spec.Name.Name == old {
+						spec.Name.Name = new
+						spec.Name.Obj.Name = new
 					}
 				}
 			}
