@@ -38,6 +38,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"gopkg.in/inconshreveable/log15.v2"
 )
 
 // Package description from the go list command
@@ -103,8 +105,46 @@ func dependencies(path string) (map[string][]string, error) {
 	return sources, nil
 }
 
+// Iterates over a package contents and collects all declarations to rename.
+func declarations(paths []string) ([]string, error) {
+	results := []string{}
+	for _, path := range paths {
+		// Parse the specified source file
+		fileSet := token.NewFileSet()
+		tree, err := parser.ParseFile(fileSet, path, nil, parser.ParseComments)
+		if err != nil {
+			return nil, err
+		}
+		// Collect all top level declarations
+		for _, decl := range tree.Decls {
+			switch decl := decl.(type) {
+			case *ast.FuncDecl:
+				if decl.Recv == nil {
+					results = append(results, decl.Name.String())
+				}
+			case *ast.GenDecl:
+				for _, spec := range decl.Specs {
+					switch spec := spec.(type) {
+					case *ast.ValueSpec:
+						for _, name := range spec.Names {
+							results = append(results, name.String())
+						}
+					case *ast.TypeSpec:
+						results = append(results, spec.Name.String())
+					default:
+						log15.Warn("Unknown specification", "spec", spec)
+					}
+				}
+			default:
+				log15.Warn("Unknown declaration", "decl", decl)
+			}
+		}
+	}
+	return results, nil
+}
+
 // Parses a source file and scopes all global declarations.
-func rewrite(src string, pkg string) ([]byte, error) {
+func rewrite(src string, pkg string, decls []string) ([]byte, error) {
 	fileSet := token.NewFileSet()
 	tree, err := parser.ParseFile(fileSet, src, nil, parser.ParseComments)
 	if err != nil {
@@ -112,28 +152,8 @@ func rewrite(src string, pkg string) ([]byte, error) {
 	}
 	// Scope all top level declarations if not main file
 	if pkg != "" {
-		for _, decl := range tree.Decls {
-			switch v := decl.(type) {
-			case *ast.FuncDecl:
-				if v.Recv == nil {
-					rename(tree, v.Name.String(), pkg+"ᴥ"+v.Name.String())
-				}
-			case *ast.GenDecl:
-				for _, spec := range v.Specs {
-					switch spec := spec.(type) {
-					case *ast.ValueSpec:
-						for _, name := range spec.Names {
-							rename(tree, name.String(), pkg+"ᴥ"+name.String())
-						}
-					case *ast.TypeSpec:
-						rename(tree, spec.Name.String(), pkg+"ᴥ"+spec.Name.String())
-					default:
-						fmt.Println("Unknown spec:", spec)
-					}
-				}
-			default:
-				fmt.Println(v)
-			}
+		for _, decl := range decls {
+			rename(tree, decl, pkg+"ᴥ"+decl)
 		}
 	}
 	// Generate the new source contents
@@ -271,8 +291,14 @@ func main() {
 	// Rewrite all the dependencies
 	pieces := make([][]byte, 0, len(deps))
 	for pkg, sources := range deps {
+		// Collect all the declarations in need of rewriting
+		decls, err := declarations(sources)
+		if err != nil {
+			log.Fatalf("Failed to collect top level declarations %s: %v", pkg, err)
+		}
+		// Rewrite each of them in each source file
 		for _, src := range sources {
-			blob, err := rewrite(src, pkg)
+			blob, err := rewrite(src, pkg, decls)
 			if err != nil {
 				log.Fatalf("Failed to rewrite dependency %s: %v.", src, err)
 			}
@@ -280,7 +306,7 @@ func main() {
 		}
 	}
 	// Rewrite the main file itself, append all dependencies
-	main, err := rewrite(flag.Args()[0], "")
+	main, err := rewrite(flag.Args()[0], "", nil)
 	if err != nil {
 		log.Fatalf("Failed to rewrite main file %s: %v.", flag.Args()[0], err)
 	}
