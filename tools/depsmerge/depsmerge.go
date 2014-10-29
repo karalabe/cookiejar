@@ -24,12 +24,14 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"go/ast"
 	"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -159,8 +161,8 @@ func rewrite(src string, pkg string) ([]byte, error) {
 						return false
 					} else if !info.Standard {
 						// Add scope to external import
-						scoper := regexp.MustCompile("\\b" + info.Name + "\\.(.+)")
-						blob = scoper.ReplaceAll(blob, []byte(info.Name+"ᴥ$1"))
+						scoper := regexp.MustCompile("([^\\.])" + info.Name + "\\.(.+)")
+						blob = scoper.ReplaceAll(blob, []byte("${1}"+info.Name+"ᴥ${2}"))
 					}
 				}
 			}
@@ -232,9 +234,11 @@ func rename(tree *ast.File, old, new string) {
 }
 
 // Flattens a main file with rewritten dependencies.
-func flatten(main []byte, deps [][]byte) ([]byte, error) {
-	// Dump all code pieces into a buffer
+func flatten(pkg string, main []byte, deps [][]byte) ([]byte, error) {
 	buffer := new(bytes.Buffer)
+
+	// Dump all code pieces into a buffer
+	fmt.Fprintf(buffer, "package %s\n\n", pkg)
 	fmt.Fprintf(buffer, "%s\n\n", main)
 	for _, dep := range deps {
 		fmt.Fprintf(buffer, "%s\n\n", dep)
@@ -247,8 +251,14 @@ func flatten(main []byte, deps [][]byte) ([]byte, error) {
 	return blob, nil
 }
 
+// Some configuration flags to override the defaults
+var outPkg = flag.String("pkg", "main", "Package name to generate for the merged file")
+var outName = flag.String("out", "", "Source file to generate (empty = stdout)")
+
 func main() {
-	deps, err := dependencies(os.Args[1])
+	flag.Parse()
+
+	deps, err := dependencies(flag.Args()[0])
 	if err != nil {
 		log.Fatalf("Failed to parse dependency chain: %v.", err)
 	}
@@ -264,13 +274,17 @@ func main() {
 		}
 	}
 	// Rewrite the main file itself, append all dependencies
-	main, err := rewrite(os.Args[1], "")
+	main, err := rewrite(flag.Args()[0], "")
 	if err != nil {
-		log.Fatalf("Failed to rewrite main file %s: %v.", os.Args[1], err)
+		log.Fatalf("Failed to rewrite main file %s: %v.", flag.Args()[0], err)
 	}
-	blob, err := flatten(main, pieces)
+	blob, err := flatten(*outPkg, main, pieces)
 	if err != nil {
 		log.Fatalf("Failed to flatten and format sources: %v.", err)
 	}
-	fmt.Println(string(blob))
+	if *outName == "" {
+		fmt.Println(string(blob))
+	} else {
+		ioutil.WriteFile(*outName, blob, 0700)
+	}
 }
