@@ -106,8 +106,8 @@ func dependencies(path string) (map[string][]string, error) {
 }
 
 // Iterates over a package contents and collects all declarations to rename.
-func declarations(paths []string) ([]string, error) {
-	results := []string{}
+func declarations(paths []string) ([]*ast.Object, error) {
+	results := []*ast.Object{}
 	for _, path := range paths {
 		// Parse the specified source file
 		fileSet := token.NewFileSet()
@@ -120,17 +120,17 @@ func declarations(paths []string) ([]string, error) {
 			switch decl := decl.(type) {
 			case *ast.FuncDecl:
 				if decl.Recv == nil {
-					results = append(results, decl.Name.String())
+					results = append(results, ast.NewObj(ast.Fun, decl.Name.String()))
 				}
 			case *ast.GenDecl:
 				for _, spec := range decl.Specs {
 					switch spec := spec.(type) {
 					case *ast.ValueSpec:
 						for _, name := range spec.Names {
-							results = append(results, name.String())
+							results = append(results, ast.NewObj(ast.Var, name.String()))
 						}
 					case *ast.TypeSpec:
-						results = append(results, spec.Name.String())
+						results = append(results, ast.NewObj(ast.Typ, spec.Name.String()))
 					default:
 						log15.Warn("Unknown specification", "spec", spec)
 					}
@@ -144,7 +144,7 @@ func declarations(paths []string) ([]string, error) {
 }
 
 // Parses a source file and scopes all global declarations.
-func rewrite(src string, pkg string, decls []string) ([]byte, error) {
+func rewrite(src string, pkg string, decls []*ast.Object) ([]byte, error) {
 	fileSet := token.NewFileSet()
 	tree, err := parser.ParseFile(fileSet, src, nil, parser.ParseComments)
 	if err != nil {
@@ -153,7 +153,7 @@ func rewrite(src string, pkg string, decls []string) ([]byte, error) {
 	// Scope all top level declarations if not main file
 	if pkg != "" {
 		for _, decl := range decls {
-			rename(tree, decl, pkg+"ᴥ"+decl)
+			rename(tree, decl.Name, pkg+"ᴥ"+decl.Name, decl.Kind)
 		}
 	}
 	// Generate the new source contents
@@ -196,7 +196,7 @@ func rewrite(src string, pkg string, decls []string) ([]byte, error) {
 }
 
 // Renames a top level declaration to something else.
-func rename(tree *ast.File, old, new string) {
+func rename(tree *ast.File, old, new string, kind ast.ObjKind) {
 	// Rename top-level declarations
 	for _, decl := range tree.Decls {
 		switch decl := decl.(type) {
@@ -246,18 +246,28 @@ func rename(tree *ast.File, old, new string) {
 		// Look for identifiers to rename
 		id, ok := node.(*ast.Ident)
 		if ok && id.Obj == nil && id.Name == old {
-			// If selected identifier, leave it alone
-			if _, ok := stack[len(stack)-2].(*ast.SelectorExpr); ok {
+			// Don't rename selected identifiers, member functions, struct keys
+			switch stack[len(stack)-2].(type) {
+			case *ast.SelectorExpr, *ast.FuncDecl:
 				return true
-			}
-			// If member function, leave it alone
-			if _, ok := stack[len(stack)-2].(*ast.FuncDecl); ok {
-				return true
+			case *ast.KeyValueExpr:
+				// If the rename is a variable, allow it
+				if kind != ast.Var && kind != ast.Con {
+					return true
+				}
 			}
 			id.Name = new
 		}
 		if ok && id.Obj != nil && id.Name == old && id.Obj.Name == new {
-			id.Name = id.Obj.Name
+			// Don't rename struct keys
+			switch stack[len(stack)-2].(type) {
+			case *ast.KeyValueExpr:
+				// If the rename is a variable, allow it
+				if kind != ast.Var && kind != ast.Con {
+					return true
+				}
+			}
+			id.Name = new
 		}
 		return true
 	})
