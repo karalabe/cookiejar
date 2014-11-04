@@ -14,13 +14,13 @@
 // Alternatively, the CookieJar toolbox may be used in accordance with the terms
 // and conditions contained in a signed written agreement between you and the
 // author(s).
-//
-// Author: peterke@gmail.com (Peter Szilagyi)
+
 package bfs
 
 import (
-	"gopkg.in/karalabe/cookiejar.v1/graph"
 	"testing"
+
+	"gopkg.in/karalabe/cookiejar.v1/graph"
 )
 
 type graphTest struct {

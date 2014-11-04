@@ -14,8 +14,6 @@
 // Alternatively, the CookieJar toolbox may be used in accordance with the terms
 // and conditions contained in a signed written agreement between you and the
 // author(s).
-//
-// Author: peterke@gmail.com (Peter Szilagyi)
 
 package main
 

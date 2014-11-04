@@ -14,8 +14,6 @@
 // Alternatively, the CookieJar toolbox may be used in accordance with the terms
 // and conditions contained in a signed written agreement between you and the
 // author(s).
-//
-// Author: peterke@gmail.com (Peter Szilagyi)
 
 // Package graph implements a simple graph data structure and supporting API to
 // allow implementing graph alogirthms on top.
