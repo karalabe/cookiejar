@@ -29,6 +29,25 @@ import (
 	"gopkg.in/qml.v1/webengine"
 )
 
+// Arena QML to not require additional files
+const arenaQml = `
+import QtQuick 2.1
+import QtWebEngine 1.0
+import QtQuick.Controls 1.0
+
+ApplicationWindow {
+	title: "CodinGame Karalabe Arena"
+    width: 1024
+    height: 768
+    
+    WebEngineView {
+    	objectName: "arena"
+        anchors.fill: parent
+        url: "http://codingame.com"
+    }
+}
+`
+
 // Command line flags for the arena
 var repo = flag.String("repo", "challenges", "Challenge repository to work with")
 
@@ -56,7 +75,7 @@ func arena() error {
 	engine.On("quit", func() { os.Exit(0) })
 
 	// Load the main arena content from QML
-	view, err := engine.LoadFile("arena.qml")
+	view, err := engine.LoadString("codingame.qml", arenaQml)
 	if err != nil {
 		return err
 	}
