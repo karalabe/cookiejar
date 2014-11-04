@@ -70,7 +70,7 @@ func arena() error {
 	ctrl.arena.On("loadingChanged", ctrl.InjectControl)
 
 	// Start the application and wait till closure
-	win.Show() //.Call("showMaximized")
+	win.Call("showMaximized")
 	win.Wait()
 	return nil
 }
