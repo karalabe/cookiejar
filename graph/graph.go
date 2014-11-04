@@ -53,6 +53,14 @@ func (g *Graph) Connect(a, b int) {
 	}
 }
 
+// Disconnects two vertices of a graph (may be a loopback)..
+func (g *Graph) Disconnect(a, b int) {
+	g.edges[a].Remove(b)
+	if a != b {
+		g.edges[b].Remove(a)
+	}
+}
+
 // Executes a function for every neighbor of a vertex.
 func (g *Graph) Do(v int, f func(interface{})) {
 	g.edges[v].Do(f)
