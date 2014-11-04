@@ -1,5 +1,5 @@
-  CookieJar - A contestant's algorithm toolbox (go)
-=====================================================
+  A contestant's algorithm toolbox
+====================================
 
 CookieJar is a small collection of common algorithms, data structures and library extensions that were deemed handy for computing competitions at one point or another.
 
