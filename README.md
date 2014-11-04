@@ -23,22 +23,22 @@ For more details, see the [package documentation](http://godoc.org/gopkg.in/kara
 
 Algorithms:
  - Graph
-     - [Breadth First Search](http://godoc.org/github.com/karalabe/cookiejar/graph/bfs)
-     - [Depth First Search](http://godoc.org/github.com/karalabe/cookiejar/graph/dfs)
+     - [Breadth First Search](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/graph/bfs)
+     - [Depth First Search](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/graph/dfs)
 
 Data structures:
- - [Bag](http://godoc.org/github.com/karalabe/cookiejar/bag)
- - [Deque](http://godoc.org/github.com/karalabe/cookiejar/deque)
- - [Graph](http://godoc.org/github.com/karalabe/cookiejar/graph)
- - [Priority Queue](http://godoc.org/github.com/karalabe/cookiejar/prque)
- - [Queue](http://godoc.org/github.com/karalabe/cookiejar/queue)
- - [Set](http://godoc.org/github.com/karalabe/cookiejar/set)
- - [Stack](http://godoc.org/github.com/karalabe/cookiejar/stack)
+ - [Bag](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/bag)
+ - [Deque](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/deque)
+ - [Graph](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/graph)
+ - [Priority Queue](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/prque)
+ - [Queue](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/queue)
+ - [Set](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/set)
+ - [Stack](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/stack)
  
 Extensions:
- - [math](http://godoc.org/github.com/karalabe/cookiejar/exts/mathext)
+ - [math](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/exts/mathext)
      - Min & Max for int and *big.Int/Rat
- - [sort](http://godoc.org/github.com/karalabe/cookiejar/exts/sortext)
+ - [sort](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/exts/sortext)
      - Sort and Search for *big.Int/Rat
      - Unique for any sort.Interface
  
