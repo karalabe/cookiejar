@@ -175,7 +175,7 @@ func rewrite(src string, pkg string, decls []*ast.Object) ([]byte, error) {
 						return false
 					} else if !info.Standard {
 						// Add scope to external import
-						scoper := regexp.MustCompile("([^\\.])" + info.Name + "\\.(.+)")
+						scoper := regexp.MustCompile("([^\\.])" + info.Name + "\\.([^ ])")
 						blob = scoper.ReplaceAll(blob, []byte("${1}"+info.Name+"ᴥ${2}"))
 					}
 				}

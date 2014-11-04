@@ -53,7 +53,7 @@ func (g *Graph) Connect(a, b int) {
 	}
 }
 
-// Disconnects two vertices of a graph (may be a loopback)..
+// Disconnects two vertices of a graph (may be a loopback).
 func (g *Graph) Disconnect(a, b int) {
 	g.edges[a].Remove(b)
 	if a != b {
