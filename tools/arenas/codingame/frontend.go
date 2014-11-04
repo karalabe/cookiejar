@@ -105,18 +105,36 @@ func (c *Control) InjectControl(request qml.Object) {
 		return
 	}
 	// Try and indefinitely find an editor, and fetch its contents into the title
-	script := `
+	ctrlJs := `
 		// Dial back to the arena backend
 		var ws = new WebSocket("ws://localhost:` + fmt.Sprint(c.backend) + `");
 		ws.onmessage = function(msg) {
-			var update = JSON.parse(msg.data);
+			var packet = JSON.parse(msg.data);
+
+			// Check for system notifications
+			if (packet.message != undefined) {
+				noty({
+					layout: 'top',
+					type: packet.type,
+					text: packet.message,
+					dismissQueue: true, 
+					animation: {
+						open: {height: 'toggle'},
+						close: {height: 'toggle'},
+						easing: 'swing',
+						speed: 500 
+						},
+					timeout: 3000
+				});   
+				return;
+			}
 
 			// Code update arrived, fetch enditor and ensure correct challenge
 			var editor = document.getElementById('ideFrame').contentWindow.ace.edit('ace_edit');
-			if (editor != 'undefined') {
+			if (editor != undefined) {
 				var title = document.getElementById('ideFrame').contentDocument.getElementsByClassName('challengeTitle')[0];
-				if (title.textContent.trim() == update.name) {
-					editor.setValue(update.source, 0);
+				if (title.textContent.trim() == packet.name) {
+					editor.setValue(packet.source, 0);
 					editor.navigateFileStart();
 				}
 			}
@@ -125,7 +143,7 @@ func (c *Control) InjectControl(request qml.Object) {
 		// Keep checking for editor presence
 		setInterval(function() {
 			var editor = document.getElementById('ideFrame').contentWindow.ace.edit('ace_edit');
-			if (editor != 'undefined') {
+			if (editor != undefined) {
 				// Assemble a source report and send it to the backend
 				var title = document.getElementById('ideFrame').contentDocument.getElementsByClassName('challengeTitle')[0];
 				var challenge = {
@@ -138,5 +156,6 @@ func (c *Control) InjectControl(request qml.Object) {
 	`
 
 	log15.Info("injecting frontend javascript")
-	c.arena.Call("runJavaScript", script)
+	c.arena.Call("runJavaScript", notifyJs)
+	c.arena.Call("runJavaScript", ctrlJs)
 }

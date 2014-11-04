@@ -25,6 +25,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"gopkg.in/fsnotify.v1"
@@ -88,6 +89,7 @@ func endpoint(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
+	open, conflict := "", ""
 	for {
 		// Fetch the challenge details
 		msg := new(challenge)
@@ -115,6 +117,7 @@ func endpoint(w http.ResponseWriter, r *http.Request) {
 				log15.Error("failed to write challenge", "error", err)
 				return
 			}
+			notify(conn, "success", "New challenge registered: "+msg.Name)
 		} else {
 			// Otherwise make sure we're not conflicting
 			if source, err := ioutil.ReadFile(main); err != nil {
@@ -122,7 +125,16 @@ func endpoint(w http.ResponseWriter, r *http.Request) {
 				return
 			} else if string(source) != msg.Source {
 				log15.Warn("solution conflict, download denied", "name", msg.Name)
+				if conflict == msg.Name {
+					notify(conn, "warning", "Solution conflict, download denied: "+msg.Name)
+				}
+				conflict = msg.Name
 				continue
+			}
+			conflict = ""
+			if open != msg.Name {
+				open = msg.Name
+				notify(conn, "information", "Challenge accepting uploads: "+msg.Name)
 			}
 		}
 		// Try to monitor the file
@@ -172,6 +184,7 @@ func monitor() {
 						log15.Error("failed to upload new solution", "error", err)
 						continue
 					}
+					notify(conn, "success", "Submission uploaded: "+name+" at "+time.Now().Format("15:04:05"))
 				}
 			}
 		case err := <-watcher.Errors:
