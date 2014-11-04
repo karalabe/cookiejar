@@ -28,8 +28,8 @@
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
 
-// Package geom implements basic geometric types and operations on them.
-package geom
+// Package geometry implements basic geometric types and operations on them.
+package geometry
 
 // Epsilon value for float equality comparison.
 var eps = float64(1e-9)

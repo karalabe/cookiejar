@@ -28,7 +28,7 @@
 //
 // Author: peterke@gmail.com (Peter Szilagyi)
 
-package geom
+package geometry
 
 import (
 	"math"
