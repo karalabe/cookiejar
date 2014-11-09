@@ -20,7 +20,7 @@ package prque_test
 import (
 	"fmt"
 
-	"gopkg.in/karalabe/cookiejar.v1/collections/prque"
+	"gopkg.in/karalabe/cookiejar.v2/collections/prque"
 )
 
 // Insert some data into a priority queue and pop them out in prioritized order.

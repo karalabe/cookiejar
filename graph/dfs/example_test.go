@@ -20,8 +20,8 @@ package dfs_test
 import (
 	"fmt"
 
-	"gopkg.in/karalabe/cookiejar.v1/graph"
-	"gopkg.in/karalabe/cookiejar.v1/graph/dfs"
+	"gopkg.in/karalabe/cookiejar.v2/graph"
+	"gopkg.in/karalabe/cookiejar.v2/graph/dfs"
 )
 
 // Small API demo based on a trie graph and a few disconnected vertices.

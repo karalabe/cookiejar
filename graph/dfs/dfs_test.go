@@ -20,7 +20,7 @@ package dfs
 import (
 	"testing"
 
-	"gopkg.in/karalabe/cookiejar.v1/graph"
+	"gopkg.in/karalabe/cookiejar.v2/graph"
 )
 
 type graphTest struct {

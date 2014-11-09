@@ -20,7 +20,7 @@ package deque_test
 import (
 	"fmt"
 
-	"gopkg.in/karalabe/cookiejar.v1/collections/deque"
+	"gopkg.in/karalabe/cookiejar.v2/collections/deque"
 )
 
 // Simple usage example that inserts the numbers 0, 1, 2 into a deque and then

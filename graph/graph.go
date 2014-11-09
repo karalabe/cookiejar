@@ -20,20 +20,23 @@
 package graph
 
 import (
-	"gopkg.in/karalabe/cookiejar.v1/collections/bag"
+	"gopkg.in/karalabe/cookiejar.v2/collections/bag"
 )
 
 // Data structure for representing a graph.
 type Graph struct {
 	nodes int
+	infos map[int]interface{}
 	edges []*bag.Bag
 }
 
 // Creates a new undirected graph.
 func New(vertices int) *Graph {
-	g := new(Graph)
-	g.nodes = vertices
-	g.edges = make([]*bag.Bag, vertices)
+	g := &Graph{
+		nodes: vertices,
+		infos: make(map[int]interface{}),
+		edges: make([]*bag.Bag, vertices),
+	}
 	for i := 0; i < vertices; i++ {
 		g.edges[i] = bag.New()
 	}
@@ -43,6 +46,16 @@ func New(vertices int) *Graph {
 // Returns the number of vertices in the graph.
 func (g *Graph) Vertices() int {
 	return g.nodes
+}
+
+// Assigns some data to a graph node.
+func (g *Graph) Assign(id int, data interface{}) {
+	g.infos[id] = data
+}
+
+// Retrieves the data associated with a graph node.
+func (g *Graph) Retrieve(id int) interface{} {
+	return g.infos[id]
 }
 
 // Connects two vertices of a graph (may be a loopback).

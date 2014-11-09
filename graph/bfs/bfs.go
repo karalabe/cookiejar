@@ -26,9 +26,9 @@
 package bfs
 
 import (
-	"gopkg.in/karalabe/cookiejar.v1/collections/queue"
-	"gopkg.in/karalabe/cookiejar.v1/collections/stack"
-	"gopkg.in/karalabe/cookiejar.v1/graph"
+	"gopkg.in/karalabe/cookiejar.v2/collections/queue"
+	"gopkg.in/karalabe/cookiejar.v2/collections/stack"
+	"gopkg.in/karalabe/cookiejar.v2/graph"
 )
 
 // Breadth-first-search algorithm data structure.

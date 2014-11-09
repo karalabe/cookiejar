@@ -54,6 +54,11 @@ func (p *Prque) Pop() (interface{}, float32) {
 	return item.value, item.priority
 }
 
+// Pops only the item from the queue, dropping the associated priority value.
+func (p *Prque) PopItem() interface{} {
+	return heap.Pop(p.cont).(*item).value
+}
+
 // Checks whether the priority queue is empty.
 func (p *Prque) Empty() bool {
 	return p.cont.Len() == 0

@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"gopkg.in/karalabe/cookiejar.v1/exts/mathext"
+	"gopkg.in/karalabe/cookiejar.v2/exts/mathext"
 )
 
 func ExampleMaxBigInt() {

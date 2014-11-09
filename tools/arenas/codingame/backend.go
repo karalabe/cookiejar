@@ -30,7 +30,7 @@ import (
 	"github.com/gorilla/websocket"
 	"gopkg.in/fsnotify.v1"
 	"gopkg.in/inconshreveable/log15.v2"
-	"gopkg.in/karalabe/cookiejar.v1/tools/deps"
+	"gopkg.in/karalabe/cookiejar.v2/tools/deps"
 )
 
 // Constants used by the arena backend

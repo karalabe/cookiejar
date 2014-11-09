@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"sort"
 
-	"gopkg.in/karalabe/cookiejar.v1/exts/sortext"
+	"gopkg.in/karalabe/cookiejar.v2/exts/sortext"
 )
 
 func ExampleBigInts() {

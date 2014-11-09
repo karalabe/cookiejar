@@ -20,7 +20,7 @@ package stack_test
 import (
 	"fmt"
 
-	"gopkg.in/karalabe/cookiejar.v1/collections/stack"
+	"gopkg.in/karalabe/cookiejar.v2/collections/stack"
 )
 
 // Simple usage example that inserts the numbers 1, 2, 3 into a stack and then
