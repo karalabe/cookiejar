@@ -41,7 +41,7 @@ ApplicationWindow {
     WebEngineView {
     	objectName: "arena"
         anchors.fill: parent
-        url: "http://codingame.com"
+        url: "http://www.codingame.com"
     }
 }
 `
@@ -132,8 +132,8 @@ func (c *Control) InjectControl(request qml.Object) {
 			// Code update arrived, fetch enditor and ensure correct challenge
 			var editor = document.getElementById('ideFrame').contentWindow.ace.edit('ace_edit');
 			if (editor != undefined) {
-				var title = document.getElementById('ideFrame').contentDocument.getElementsByClassName('challengeTitle')[0];
-				if (title.textContent.trim() == packet.name) {
+				var title = document.getElementById('ideFrame').contentDocument.getElementsByClassName('challengeTitle')[0].firstChild;
+				if (title.nodeValue.trim() == packet.name) {
 					editor.setValue(packet.source, 0);
 					editor.navigateFileStart();
 				}
@@ -145,9 +145,9 @@ func (c *Control) InjectControl(request qml.Object) {
 			var editor = document.getElementById('ideFrame').contentWindow.ace.edit('ace_edit');
 			if (editor != undefined) {
 				// Assemble a source report and send it to the backend
-				var title = document.getElementById('ideFrame').contentDocument.getElementsByClassName('challengeTitle')[0];
+				var title = document.getElementById('ideFrame').contentDocument.getElementsByClassName('challengeTitle')[0].firstChild;
 				var challenge = {
-					'name':   title.textContent,
+					'name':   title.nodeValue.trim(),
 					'source': editor.getValue()
 				};
 				ws.send(JSON.stringify(challenge));
