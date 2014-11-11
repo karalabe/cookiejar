@@ -88,8 +88,13 @@ func (s *System) Update(name string, input float64) {
 	}
 }
 
+// Evaluates a single utility.
+func (s *System) Evaluate(name string) float64 {
+	return s.utils[name].Evaluate()
+}
+
 // Evaluates a batch of utilities.
-func (s *System) Evaluate(names []string) []float64 {
+func (s *System) EvaluateAll(names []string) []float64 {
 	values := make([]float64, len(names))
 	for i := 0; i < len(names); i++ {
 		values[i] = s.utils[names[i]].Evaluate()

@@ -55,7 +55,9 @@ func (u *sourceUtility) limit(lo, hi float64) {
 // Updates the utility to a new data value.
 func (u *sourceUtility) update(input float64) {
 	// Normalize the input and calculate the output
-	input = (input - u.lo) / (u.hi - u.lo)
+	if diff := u.hi - u.lo; diff != 0 {
+		input = (input - u.lo) / diff
+	}
 	u.value = math.Min(1, math.Max(0, u.curve(input)))
 
 	// Reset all derived utilities
@@ -93,6 +95,7 @@ func newDerivedUtility(combinator Combinator, srcA, srcB utility) utility {
 		srcA:       srcA,
 		srcB:       srcB,
 		children:   bag.New(),
+		reset:      false,
 	}
 	// Register the dependencies and return
 	srcA.Dependency(util)

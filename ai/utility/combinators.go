@@ -39,6 +39,10 @@ func Mul(a, b float64) Combinator {
 // Creates a dividing curve combinator z = a(x/y) + b.
 func Div(a, b float64) Combinator {
 	return func(x, y float64) float64 {
+		// If the divisor is zero, assume maximum utility
+		if y == 0 {
+			return 1.0
+		}
 		return a*(x/y) + b
 	}
 }

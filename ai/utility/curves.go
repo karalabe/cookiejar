@@ -34,11 +34,11 @@ func Linear(a, b float64) Curve {
 func Exponential(center, exp float64, convex bool) Curve {
 	if convex {
 		return func(x float64) float64 {
-			return 1 - math.Pow(math.Abs(x-center), exp)
+			return math.Pow(math.Abs(x-center), exp)
 		}
 	} else {
 		return func(x float64) float64 {
-			return math.Pow(math.Abs(x-center), exp)
+			return 1 - math.Pow(math.Abs(x-center), exp)
 		}
 	}
 }
