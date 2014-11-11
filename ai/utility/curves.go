@@ -43,9 +43,16 @@ func Exponential(center, exp float64, convex bool) Curve {
 	}
 }
 
-// Creates a sigmoid threshold curve, specializing whether it's increasing.
-func Logistic(center float64, inc bool) Curve {
-	return func(x float64) float64 {
-		return 1 / (1 + math.Exp(10*(center-x)))
+// Creates a sigmoid threshold curve, centered at the given location, with the
+// steepnes defined by the slope multiplier y = 1 / (slope*e)^10(center-x)
+func Logistic(center, slope float64, inc bool) Curve {
+	if inc {
+		return func(x float64) float64 {
+			return 1 / (1 + math.Pow(slope*math.E, 10*(center-x)))
+		}
+	} else {
+		return func(x float64) float64 {
+			return 1 - 1/(1+math.Pow(slope*math.E, 10*(center-x)))
+		}
 	}
 }

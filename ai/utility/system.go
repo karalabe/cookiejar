@@ -66,9 +66,31 @@ func (s *System) Combine(name string, utilA, utilB string, combinator Combinator
 	s.utils[name] = newDerivedUtility(combinator, srcA, srcB)
 }
 
+// Sets the normalization limits for a utility curve.
+func (s *System) Limit(name string, lo, hi float64) {
+	// Transform to lowercase and do some sanity checks
+	name = strings.ToLower(name)
+	if util, ok := s.utils[name]; !ok {
+		panic(fmt.Sprintf("Utility not registered: %s", name))
+	} else {
+		util.(*sourceUtility).limit(lo, hi)
+	}
+}
+
+// Updates the utility to a new data value.
+func (s *System) Update(name string, input float64) {
+	// Transform to lowercase and do some sanity checks
+	name = strings.ToLower(name)
+	if util, ok := s.utils[name]; !ok {
+		panic(fmt.Sprintf("Utility not registered: %s", name))
+	} else {
+		util.(*sourceUtility).update(input)
+	}
+}
+
 // Evaluates a batch of utilities.
 func (s *System) Evaluate(names []string) []float64 {
-	values := make([]float64, 0, len(names))
+	values := make([]float64, len(names))
 	for i := 0; i < len(names); i++ {
 		values[i] = s.utils[names[i]].Evaluate()
 	}

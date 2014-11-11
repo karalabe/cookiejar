@@ -22,16 +22,23 @@ package utility
 // [0, 1].
 type Combinator func(x, y float64) float64
 
-// Creates an additive curve combinator z = a*x + b*y + c.
-func Additive(a, b, c float64) Combinator {
+// Creates an additive curve combinator z = ax + by + c.
+func Add(a, b, c float64) Combinator {
 	return func(x, y float64) float64 {
 		return a*x + b*y + c
 	}
 }
 
-// Creates a multiplicative curve combinator z = a*x*y + b.
-func Multiplicative(a, b float64) Combinator {
+// Creates a multiplicative curve combinator z = axy + b.
+func Mul(a, b float64) Combinator {
 	return func(x, y float64) float64 {
 		return a*x*y + b
+	}
+}
+
+// Creates a dividing curve combinator z = a(x/y) + b.
+func Div(a, b float64) Combinator {
+	return func(x, y float64) float64 {
+		return a*(x/y) + b
 	}
 }
