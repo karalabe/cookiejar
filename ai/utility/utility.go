@@ -23,6 +23,14 @@ import (
 	"gopkg.in/karalabe/cookiejar.v2/collections/bag"
 )
 
+// Generic curve function type. Input is automatically normalized to [0, 1]
+// prior to passing it to the curve. Outputs is clamped to [0, 1].
+type Curve func(float64) float64
+
+// Generic curve function combinator. Input is guaranteed to be in [0, 1].
+// Outputs is clamped to [0, 1].
+type Combinator func(x, y float64) float64
+
 type utility interface {
 	Dependency(util utility)
 	Evaluate() float64
@@ -30,7 +38,7 @@ type utility interface {
 
 // Data-source based utility, normalizing and transforming an input stream by an
 // assigned curve.
-type sourceUtility struct {
+type inputUtility struct {
 	curve  Curve   // Data transformation curve
 	lo, hi float64 // Normalization limits
 
@@ -40,20 +48,20 @@ type sourceUtility struct {
 }
 
 // Creates a new data source utility and associated a transformation curve.
-func newSourceUtility(curve Curve) utility {
-	return &sourceUtility{
+func newInputUtility(curve Curve) *inputUtility {
+	return &inputUtility{
 		curve:    curve,
 		children: bag.New(),
 	}
 }
 
 // Sets the data limits used during normalization.
-func (u *sourceUtility) limit(lo, hi float64) {
+func (u *inputUtility) limit(lo, hi float64) {
 	u.lo, u.hi = lo, hi
 }
 
 // Updates the utility to a new data value.
-func (u *sourceUtility) update(input float64) {
+func (u *inputUtility) update(input float64) {
 	// Normalize the input and calculate the output
 	if diff := u.hi - u.lo; diff != 0 {
 		input = (input - u.lo) / diff
@@ -62,22 +70,22 @@ func (u *sourceUtility) update(input float64) {
 
 	// Reset all derived utilities
 	u.children.Do(func(util interface{}) {
-		util.(*derivedUtility).Reset()
+		util.(*comboUtility).Reset()
 	})
 }
 
 // Adds a new dependency to the utility hierarchy.
-func (u *sourceUtility) Dependency(util utility) {
+func (u *inputUtility) Dependency(util utility) {
 	u.children.Insert(util)
 }
 
 // Returns the utility value for the set data point.
-func (u *sourceUtility) Evaluate() float64 {
+func (u *inputUtility) Evaluate() float64 {
 	return u.value
 }
 
 // Combination utility derived from two other utilities.
-type derivedUtility struct {
+type comboUtility struct {
 	combinator Combinator // Curve transformation combinator
 	srcA, srcB utility    // Base utilities from which to derive this one
 
@@ -88,9 +96,9 @@ type derivedUtility struct {
 }
 
 // Creates a new derived utility based on two existing ones.
-func newDerivedUtility(combinator Combinator, srcA, srcB utility) utility {
+func newComboUtility(combinator Combinator, srcA, srcB utility) *comboUtility {
 	// Create the derived utility
-	util := &derivedUtility{
+	util := &comboUtility{
 		combinator: combinator,
 		srcA:       srcA,
 		srcB:       srcB,
@@ -105,7 +113,7 @@ func newDerivedUtility(combinator Combinator, srcA, srcB utility) utility {
 }
 
 // Resets the utility value, forcing it to recalculate when needed again.
-func (u *derivedUtility) Reset() {
+func (u *comboUtility) Reset() {
 	// Skip if already reset
 	if u.reset {
 		return
@@ -113,17 +121,17 @@ func (u *derivedUtility) Reset() {
 	// Otherwise reset all derived utilities
 	u.reset = true
 	u.children.Do(func(util interface{}) {
-		util.(*derivedUtility).Reset()
+		util.(*comboUtility).Reset()
 	})
 }
 
 // Adds a new dependency to the utility hierarchy.
-func (u *derivedUtility) Dependency(util utility) {
+func (u *comboUtility) Dependency(util utility) {
 	u.children.Insert(util)
 }
 
 // Evaluates the utility chain and returns the current value.
-func (u *derivedUtility) Evaluate() float64 {
+func (u *comboUtility) Evaluate() float64 {
 	// If the utility was reset, reevaluate it
 	if u.reset {
 		u.value = math.Min(1, math.Max(0, u.combinator(u.srcA.Evaluate(), u.srcB.Evaluate())))

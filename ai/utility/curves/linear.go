@@ -15,34 +15,22 @@
 // and conditions contained in a signed written agreement between you and the
 // author(s).
 
-package utility
+package curves
 
-// A generic curve combinator for the utility library. Input will be normalized
-// to [0, 1] prior to passing it to the combinator. Outputs will be clamped to
-// [0, 1].
-type Combinator func(x, y float64) float64
+import (
+	"gopkg.in/karalabe/cookiejar.v2/ai/utility"
+)
 
-// Creates an additive curve combinator z = ax + by + c.
-func Add(a, b, c float64) Combinator {
-	return func(x, y float64) float64 {
-		return a*x + b*y + c
-	}
+// Linear curve builder. Defined as y = ax + b.
+type Linear struct {
+	A, B float64
 }
 
-// Creates a multiplicative curve combinator z = axy + b.
-func Mul(a, b float64) Combinator {
-	return func(x, y float64) float64 {
-		return a*x*y + b
-	}
-}
+// Creates the curve mapping function.
+func (l Linear) Make() utility.Curve {
+	a, b := l.A, l.B
 
-// Creates a dividing curve combinator z = a(x/y) + b.
-func Div(a, b float64) Combinator {
-	return func(x, y float64) float64 {
-		// If the divisor is zero, assume maximum utility
-		if y == 0 {
-			return 1.0
-		}
-		return a*(x/y) + b
+	return func(x float64) float64 {
+		return a*x + b
 	}
 }
