@@ -39,6 +39,7 @@ type Bfs struct {
 	visited []bool
 	parents []int
 	order   []int
+	paths   map[int][]int
 
 	pending *queue.Queue
 	builder *stack.Stack
@@ -56,6 +57,7 @@ func New(g *graph.Graph, src int) *Bfs {
 	d.parents = make([]int, g.Vertices())
 	d.order = make([]int, 1, g.Vertices())
 	d.order[0] = src
+	d.paths = make(map[int][]int)
 
 	d.pending = queue.New()
 	d.pending.Push(src)
@@ -66,26 +68,27 @@ func New(g *graph.Graph, src int) *Bfs {
 
 // Generates the path from the source node to the destination.
 func (d *Bfs) Path(dst int) []int {
-	// If not found yet, but processing's not done, search
-	if !d.visited[dst] && !d.pending.Empty() {
-		d.search(dst)
-	}
-	// If done but still not found return a nil slice
-	if !d.visited[dst] {
+	// Return nil if not reachable
+	if !d.Reachable(dst) {
 		return nil
 	}
-	// Generate the path and return
-	for dst != d.source {
-		d.builder.Push(dst)
-		dst = d.parents[dst]
-	}
-	d.builder.Push(dst)
+	// If reachable, but path not yet generated, create and cache
+	if cached, ok := d.paths[dst]; !ok {
+		for cur := dst; cur != d.source; {
+			d.builder.Push(cur)
+			cur = d.parents[cur]
+		}
+		d.builder.Push(d.source)
 
-	path := make([]int, d.builder.Size())
-	for i := 0; i < len(path); i++ {
-		path[i] = d.builder.Pop().(int)
+		path := make([]int, d.builder.Size())
+		for i := 0; i < len(path); i++ {
+			path[i] = d.builder.Pop().(int)
+		}
+		d.paths[dst] = path
+		return path
+	} else {
+		return cached
 	}
-	return path
 }
 
 // Checks whether a given vertex is reachable from the source.

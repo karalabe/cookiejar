@@ -22,12 +22,13 @@ import "fmt"
 
 // Utility theory based AI system configuration.
 type Config struct {
-	Input map[string]InputConf
-	Combo map[string]ComboConf
+	Input []InputConf
+	Combo []ComboConf
 }
 
 // Configuration for input based utility curve(s).
 type InputConf struct {
+	Name  string  // A referable name for the utility
 	Count int     // Number of curves in the set (0 defaults to singleton)
 	Min   float64 // Interval start for normalization
 	Max   float64 // Interval end for normalization
@@ -36,6 +37,7 @@ type InputConf struct {
 
 // Configuration for combination based utility curve(s).
 type ComboConf struct {
+	Name  string     // A referable name for the utility
 	Count int        // Number of curves in the set (0 defaults to singleton)
 	SrcA  string     // First input source of the combinator
 	SrcB  string     // Second input source of the combinator
@@ -52,25 +54,25 @@ func New(config *Config) *System {
 	sys := &System{
 		utils: make(map[string]utility),
 	}
-	for name, input := range config.Input {
-		sys.addInput(name, &input)
+	for _, input := range config.Input {
+		sys.addInput(&input)
 	}
-	for name, combo := range config.Combo {
-		sys.addCombo(name, &combo)
+	for _, combo := range config.Combo {
+		sys.addCombo(&combo)
 	}
 	return sys
 }
 
 // Injects a new input based utility curve set into the system.
-func (s *System) addInput(name string, config *InputConf) {
+func (s *System) addInput(config *InputConf) {
 	// Create the name set if multiple is needed
 	var names []string
 	if config.Count == 0 {
-		names = []string{name}
+		names = []string{config.Name}
 	} else {
 		names = make([]string, config.Count)
 		for i := 0; i < config.Count; i++ {
-			names[i] = fmt.Sprintf("%s:%d", name, i)
+			names[i] = fmt.Sprintf("%s:%d", config.Name, i)
 		}
 	}
 	// Create the input curve set
@@ -82,18 +84,18 @@ func (s *System) addInput(name string, config *InputConf) {
 }
 
 // Injects a new combinatorial utility curve set into the system.
-func (s *System) addCombo(name string, config *ComboConf) {
+func (s *System) addCombo(config *ComboConf) {
 	// Singleton combinations require separate handling
 	if config.Count == 0 {
 		srcA := s.utils[config.SrcA]
 		srcB := s.utils[config.SrcB]
 
-		s.utils[name] = newComboUtility(config.Comb, srcA, srcB)
+		s.utils[config.Name] = newComboUtility(config.Comb, srcA, srcB)
 		return
 	}
 	// Construct the utility set
 	for i := 0; i < config.Count; i++ {
-		name := fmt.Sprintf("%s:%d", name, i)
+		name := fmt.Sprintf("%s:%d", config.Name, i)
 
 		var srcA utility
 		if _, ok := s.utils[config.SrcA]; ok {
