@@ -28,32 +28,32 @@ type Config struct {
 
 // Configuration for input based utility curve(s).
 type InputConf struct {
-	Name    string  // A referable name for the utility
-	Count   int     // Number of curves in the set (0 defaults to singleton)
+	Id      int     // A referable identifier for the utility
 	Min     float64 // Interval start for normalization
 	Max     float64 // Interval end for normalization
+	Set     bool    // Flag whether the config defines a set of utilities
 	NonZero bool    // Flag whether the curve is allowed absolute zero output
 	Curve   Curve   // Function mapping the data to a curve
 }
 
 // Configuration for combination based utility curve(s).
 type ComboConf struct {
-	Name  string     // A referable name for the utility
-	Count int        // Number of curves in the set (0 defaults to singleton)
-	SrcA  string     // First input source of the combinator
-	SrcB  string     // Second input source of the combinator
-	Comb  Combinator // Function combining the input sources
+	Id   int        // A referable identifier for the utility
+	SrcA int        // First input source of the combinator
+	SrcB int        // Second input source of the combinator
+	Set  bool       // Flag whether the config defines a set of utilities
+	Comb Combinator // Function combining the input sources
 }
 
 // Utility theory based decision making system.
 type System struct {
-	utils map[string]utility
+	utils map[int]utility
 }
 
 // Creates a utility theory AI system.
 func New(config *Config) *System {
 	sys := &System{
-		utils: make(map[string]utility),
+		utils: make(map[int]utility),
 	}
 	for _, input := range config.Input {
 		sys.addInput(&input)
@@ -64,101 +64,76 @@ func New(config *Config) *System {
 	return sys
 }
 
-// Injects a new input based utility curve set into the system.
+// Injects a new input based utility curve (set) into the system.
 func (s *System) addInput(config *InputConf) {
-	// Create the name set if multiple is needed
-	var names []string
-	if config.Count == 0 {
-		names = []string{config.Name}
+	if config.Set {
+		// A set of utilities is needed
+		utils := newInputSetUtility(config.Curve, config.NonZero)
+		utils.Limit(config.Min, config.Max)
+		s.utils[config.Id] = utils
 	} else {
-		names = make([]string, config.Count)
-		for i := 0; i < config.Count; i++ {
-			names[i] = fmt.Sprintf("%s:%d", config.Name, i)
-		}
-	}
-	// Create the input curve set
-	for _, name := range names {
+		// Singleton input utility, insert as is
 		util := newInputUtility(config.Curve, config.NonZero)
-		util.limit(config.Min, config.Max)
-		s.utils[name] = util
+		util.Limit(config.Min, config.Max)
+		s.utils[config.Id] = util
 	}
 }
 
 // Injects a new combinatorial utility curve set into the system.
 func (s *System) addCombo(config *ComboConf) {
-	// Singleton combinations require separate handling
-	if config.Count == 0 {
+	if config.Set {
+		// A set of utilities is needed
+		srcA := s.utils[config.SrcA]
+		srcB := s.utils[config.SrcB]
+		s.utils[config.Id] = newComboSetUtility(config.Comb, srcA, srcB)
+	} else {
+		// Singleton combo utility, insert as is
 		srcA := s.utils[config.SrcA]
 		srcB := s.utils[config.SrcB]
 
-		s.utils[config.Name] = newComboUtility(config.Comb, srcA, srcB)
-		return
-	}
-	// Construct the utility set
-	for i := 0; i < config.Count; i++ {
-		name := fmt.Sprintf("%s:%d", config.Name, i)
+		util := newComboUtility(config.Comb)
+		util.Init(srcA, srcB)
 
-		var srcA utility
-		if _, ok := s.utils[config.SrcA]; ok {
-			srcA = s.utils[config.SrcA]
-		} else {
-			srcA = s.utils[fmt.Sprintf("%s:%d", config.SrcA, i)]
-		}
-
-		var srcB utility
-		if _, ok := s.utils[config.SrcB]; ok {
-			srcB = s.utils[config.SrcB]
-		} else {
-			srcB = s.utils[fmt.Sprintf("%s:%d", config.SrcB, i)]
-		}
-		s.utils[name] = newComboUtility(config.Comb, srcA, srcB)
+		s.utils[config.Id] = util
 	}
 }
 
 // Sets the normalization limits for data a utility.
-func (s *System) Limit(name string, min, max float64) {
-	s.utils[name].(*inputUtility).limit(min, max)
-}
-
-// Sets the normalization limits of a member of a data utility set.
-func (s *System) LimitOne(name string, index int, min, max float64) {
-	s.utils[fmt.Sprintf("%s:%d", name, index)].(*inputUtility).limit(min, max)
-}
-
-// Sets the normalization limits of a whole data utility set globally.
-func (s *System) LimitGlobal(name string, min, max float64) {
-	for i := 0; ; i++ {
-		if util, ok := s.utils[fmt.Sprintf("%s:%d", name, i)]; ok {
-			util.(*inputUtility).limit(min, max)
-		} else {
-			return
-		}
+func (s *System) Limit(id int, min, max float64) {
+	switch util := s.utils[id].(type) {
+	case *inputUtility:
+		util.Limit(min, max)
+	case *inputSetUtility:
+		util.Limit(min, max)
+	default:
+		panic(fmt.Sprintf("Unknown utility type: %+v", util))
 	}
 }
 
 // Updates the input of a data utility.
-func (s *System) Update(name string, input float64) {
-	s.utils[name].(*inputUtility).update(input)
+func (s *System) Update(id int, input float64) {
+	s.utils[id].(*inputUtility).Update(input)
 }
 
 // Updates the input of a member of a data utility set.
-func (s *System) UpdateOne(name string, index int, input float64) {
-	s.utils[fmt.Sprintf("%s:%d", name, index)].(*inputUtility).update(input)
+func (s *System) UpdateOne(id, index int, input float64) {
+	s.utils[id].(*inputSetUtility).Update(index, input)
 }
 
-// Updates the input of a member of whole data utility set individually.
-func (s *System) UpdateAll(name string, input []float64) {
-	for i, in := range input {
-		s.UpdateOne(name, i, in)
+// Updates the input of all the members of a data utility set.
+func (s *System) UpdateAll(id int, inputs []float64) {
+	util := s.utils[id].(*inputSetUtility)
+	for i, input := range inputs {
+		util.Update(i, input)
 	}
 }
 
 // Evaluates a singleton utility.
-func (s *System) Evaluate(name string) float64 {
-	return s.utils[name].Evaluate()
+func (s *System) Evaluate(id int) float64 {
+	return s.utils[id].(singleUtility).Evaluate()
 }
 
 // Evaluates a member of a utility set.
-func (s *System) EvaluateOne(name string, index int) float64 {
-	return s.utils[fmt.Sprintf("%s:%d", name, index)].Evaluate()
+func (s *System) EvaluateOne(id, index int) float64 {
+	return s.utils[id].(multiUtility).Evaluate(index)
 }
