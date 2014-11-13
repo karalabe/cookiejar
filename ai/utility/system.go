@@ -28,11 +28,12 @@ type Config struct {
 
 // Configuration for input based utility curve(s).
 type InputConf struct {
-	Name  string  // A referable name for the utility
-	Count int     // Number of curves in the set (0 defaults to singleton)
-	Min   float64 // Interval start for normalization
-	Max   float64 // Interval end for normalization
-	Curve Curve   // Function mapping the data to a curve
+	Name    string  // A referable name for the utility
+	Count   int     // Number of curves in the set (0 defaults to singleton)
+	Min     float64 // Interval start for normalization
+	Max     float64 // Interval end for normalization
+	NonZero bool    // Flag whether the curve is allowed absolute zero output
+	Curve   Curve   // Function mapping the data to a curve
 }
 
 // Configuration for combination based utility curve(s).
@@ -77,7 +78,7 @@ func (s *System) addInput(config *InputConf) {
 	}
 	// Create the input curve set
 	for _, name := range names {
-		util := newInputUtility(config.Curve)
+		util := newInputUtility(config.Curve, config.NonZero)
 		util.limit(config.Min, config.Max)
 		s.utils[name] = util
 	}

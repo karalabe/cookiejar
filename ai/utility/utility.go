@@ -39,8 +39,9 @@ type utility interface {
 // Data-source based utility, normalizing and transforming an input stream by an
 // assigned curve.
 type inputUtility struct {
-	curve  Curve   // Data transformation curve
-	lo, hi float64 // Normalization limits
+	curve   Curve   // Data transformation curve
+	lo, hi  float64 // Normalization limits
+	nonZero bool    // Absolute zero allowed or not
 
 	children *bag.Bag // Derived utilities based on the current one
 
@@ -48,9 +49,10 @@ type inputUtility struct {
 }
 
 // Creates a new data source utility and associated a transformation curve.
-func newInputUtility(curve Curve) *inputUtility {
+func newInputUtility(curve Curve, nonZero bool) *inputUtility {
 	return &inputUtility{
 		curve:    curve,
+		nonZero:  nonZero,
 		children: bag.New(),
 	}
 }
@@ -68,6 +70,10 @@ func (u *inputUtility) update(input float64) {
 	}
 	u.value = math.Min(1, math.Max(0, u.curve(input)))
 
+	// Prevent absolute zero as it can completely ruin the outputs
+	if u.nonZero && u.value == 0 {
+		u.value = float64(1e-9)
+	}
 	// Reset all derived utilities
 	u.children.Do(func(util interface{}) {
 		util.(*comboUtility).Reset()
