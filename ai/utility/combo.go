@@ -39,7 +39,7 @@ func newComboUtility(combinator Combinator) *comboUtility {
 	return &comboUtility{
 		combinator: combinator,
 		children:   bag.New(),
-		reset:      false,
+		reset:      true,
 	}
 }
 
