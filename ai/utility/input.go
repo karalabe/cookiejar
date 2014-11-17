@@ -86,7 +86,7 @@ func (u *inputUtility) Evaluate() float64 {
 
 		// If requested, prevent a result of absolute zero
 		if u.nonZero && u.output == 0 {
-			u.output = float64(1e-9)
+			u.output = float64(1e-18)
 		}
 		u.reset = false
 	}
