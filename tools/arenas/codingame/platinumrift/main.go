@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"runtime"
+
+	"gopkg.in/inconshreveable/log15.v2"
 )
 
 type gameDetails struct {
@@ -20,12 +22,16 @@ var sleep = flag.Int("sleep", 0, "Milliseconds to sleep between crawls")
 var ais = flag.String("ais", "./ais", "Folder containing pre-selected AIs")
 var user = flag.String("user", "./user", "Player AI agent to evaluate")
 var players = flag.Int("players", 2, "Number of players to simulate")
-var threads = flag.Int("threads", 2, "Number of simulations to run in parallel")
+var threads = flag.Int("threads", 0, "Concurrent simulations (default = #cores)")
 
 func main() {
-	runtime.GOMAXPROCS(16)
-	flag.Parse()
+	log15.Root().SetHandler(log15.LvlFilterHandler(log15.LvlInfo, log15.StderrHandler))
+	runtime.GOMAXPROCS(2 * runtime.NumCPU())
 
+	flag.Parse()
+	if *threads == 0 {
+		*threads = runtime.NumCPU()
+	}
 	// If additional matches are needed, crawl them
 	if *crawl > 0 {
 		if err := update(*boards, *crawl, *sleep); err != nil {

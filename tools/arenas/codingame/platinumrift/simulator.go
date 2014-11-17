@@ -66,12 +66,16 @@ func simulate(database string, ais string, user string, players int, threads int
 	pend := new(sync.WaitGroup)
 	pend.Add(len(db))
 
+	limiter := make(chan struct{}, threads)
 	for _, game := range db {
 		go func() {
 			defer pend.Done()
+
+			limiter <- struct{}{}
 			if err := matcher(game, agents, user, players, []int{}, scores); err != nil {
 				log15.Crit("Failed to run matchmaker: %v.", err)
 			}
+			<-limiter
 		}()
 	}
 	pend.Wait()
