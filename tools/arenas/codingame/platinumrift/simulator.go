@@ -67,16 +67,16 @@ func simulate(database string, ais string, user string, players int, threads int
 	pend.Add(len(db))
 
 	limiter := make(chan struct{}, threads)
-	for _, game := range db {
-		go func() {
+	for id, game := range db {
+		go func(id int, game *gameDetails) {
 			defer pend.Done()
 
 			limiter <- struct{}{}
-			if err := matcher(game, agents, user, players, []int{}, scores); err != nil {
+			if err := matcher(id, game, agents, user, players, []int{}, scores); err != nil {
 				log15.Crit("Failed to run matchmaker: %v.", err)
 			}
 			<-limiter
-		}()
+		}(id, game)
 	}
 	pend.Wait()
 
@@ -89,7 +89,7 @@ func simulate(database string, ais string, user string, players int, threads int
 	return results, nil
 }
 
-func matcher(game *gameDetails, ais []string, user string, players int, opponents []int, scores []uint32) error {
+func matcher(id int, game *gameDetails, ais []string, user string, players int, opponents []int, scores []uint32) error {
 	// If the match is made, simulate and score
 	if len(opponents) == players-1 {
 		match := make([]string, players)
@@ -98,7 +98,7 @@ func matcher(game *gameDetails, ais []string, user string, players int, opponent
 		}
 		match[players-1] = user
 
-		if winner, err := battle(game, match); err != nil {
+		if winner, err := battle(id, game, match); err != nil {
 			return err
 		} else {
 			if winner < players-1 {
@@ -112,7 +112,7 @@ func matcher(game *gameDetails, ais []string, user string, players int, opponent
 	// Otherwise get a new player into the match
 	for i := 0; i < len(ais); i++ {
 		opponents = append(opponents, i)
-		if err := matcher(game, ais, user, players, opponents, scores); err != nil {
+		if err := matcher(id, game, ais, user, players, opponents, scores); err != nil {
 			return err
 		}
 		opponents = opponents[:len(opponents)-1]
@@ -121,8 +121,8 @@ func matcher(game *gameDetails, ais []string, user string, players int, opponent
 }
 
 // Runs a single battle between players on a given board.
-func battle(game *gameDetails, players []string) (int, error) {
-	log15.Info("Running battle", "ais", players)
+func battle(id int, game *gameDetails, players []string) (int, error) {
+	log15.Info("Running battle", "game", id, "ais", players)
 
 	// Create the game stats for the current battle
 	stats := &gameStats{
@@ -279,6 +279,8 @@ func battle(game *gameDetails, players []string) (int, error) {
 			zones[owner]++
 		}
 	}
+	log15.Info("Battle concluded", "game", id, "ais", players, "zones", zones)
+
 	best := 0
 	for i := 1; i < len(players); i++ {
 		if zones[best] < zones[i] {
