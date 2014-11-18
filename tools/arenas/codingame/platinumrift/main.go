@@ -19,7 +19,7 @@ var boards = flag.String("boards", "boards.db", "Database file containing real g
 var crawl = flag.Int("crawl", 0, "Number of fresh replays to crawl")
 var sleep = flag.Int("sleep", 0, "Milliseconds to sleep between crawls")
 
-var ais = flag.String("ais", "./ais", "Folder containing pre-selected AIs")
+var ais = flag.String("ai", "./aibin", "Folder containing pre-selected AIs")
 var user = flag.String("user", "./user", "Player AI agent to evaluate")
 var players = flag.Int("players", 2, "Number of players to simulate")
 var threads = flag.Int("threads", 0, "Concurrent simulations (default = #cores)")
@@ -39,13 +39,13 @@ func main() {
 			return
 		}
 	} else {
-		res, err := simulate(*boards, *ais, *user, *players, *threads)
+		ais, scores, err := simulate(*boards, *ais, *user, *players, *threads)
 		if err != nil {
 			fmt.Printf("Failed to run simulation: %v.\n", err)
 			return
 		}
-		for ai, score := range res {
-			fmt.Printf("%40s: %d wins\n", ai, score)
+		for i := 0; i < len(ais); i++ {
+			fmt.Printf("%40s: %d wins\n", ais[i], scores[i])
 		}
 	}
 }

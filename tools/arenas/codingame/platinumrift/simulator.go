@@ -41,15 +41,15 @@ type gameStats struct {
 }
 
 //
-func simulate(database string, ais string, user string, players int, threads int) (map[string]int, error) {
+func simulate(database string, ais string, user string, players int, threads int) ([]string, []int, error) {
 	// Open the replay database
 	db := make(map[int]*gameDetails)
 	if file, err := os.Open(database); err != nil {
-		return nil, err
+		return nil, nil, err
 	} else {
 		defer file.Close()
 		if err := gob.NewDecoder(file).Decode(&db); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	// Load all the pre-set AIs
@@ -80,13 +80,11 @@ func simulate(database string, ais string, user string, players int, threads int
 	}
 	pend.Wait()
 
-	results := make(map[string]int)
-	for i, ai := range agents {
-		results[ai] = int(scores[i])
+	results := make([]int, len(scores))
+	for i, score := range scores {
+		results[i] = int(score)
 	}
-	results[user] = int(scores[len(scores)-1])
-
-	return results, nil
+	return append(agents, user), results, nil
 }
 
 func matcher(id int, game *gameDetails, ais []string, user string, players int, opponents []int, scores []uint32) error {
