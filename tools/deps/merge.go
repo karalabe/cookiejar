@@ -267,8 +267,48 @@ func rename(tree *ast.File, old, new string, kind ast.ObjKind) {
 	})
 }
 
+// Removes dead code from the source blob.
+func shake(blob []byte) ([]byte, error) {
+	// Repeat the process until all occurrences have been shaken down
+	cascade := true
+	for cascade {
+		cascade = false
+
+		// Parse the remaining data blob
+		fileSet := token.NewFileSet()
+		tree, err := parser.ParseFile(fileSet, "", blob, 0)
+		if err != nil {
+			return nil, err
+		}
+		// Shake all unused top level declarations
+		retain := []ast.Decl{}
+		for _, decl := range tree.Decls {
+			switch decl := decl.(type) {
+			case *ast.FuncDecl:
+				// If a plain dangling top level function, check usage
+				if name := decl.Name.Name; decl.Recv == nil && strings.Contains(name, "ᴥ") {
+					if bytes.Index(blob, []byte(name)) == bytes.LastIndex(blob, []byte(name)) {
+						cascade = true
+						continue
+					}
+				}
+			}
+			retain = append(retain, decl)
+		}
+		tree.Decls = retain
+
+		// Regenerate the blob
+		out := bytes.NewBuffer(nil)
+		if err := printer.Fprint(out, fileSet, tree); err != nil {
+			return nil, err
+		}
+		blob = out.Bytes()
+	}
+	return blob, nil
+}
+
 // Flattens a main file with rewritten dependencies.
-func flatten(pkg string, main []byte, deps [][]byte) ([]byte, error) {
+func flatten(pkg string, main []byte, deps [][]byte, remDead bool) ([]byte, error) {
 	buffer := new(bytes.Buffer)
 
 	// Dump all code pieces into a buffer
@@ -282,11 +322,20 @@ func flatten(pkg string, main []byte, deps [][]byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Shake all dependencies, format and goimport again
+	if remDead {
+		if blob, err = shake(blob); err != nil {
+			return nil, err
+		}
+		if blob, err = imports.Process("", blob, nil); err != nil {
+			return nil, err
+		}
+	}
 	return blob, nil
 }
 
 // Merges a Go source with all its dependencies.
-func Merge(path string) (string, error) {
+func Merge(path string, shake bool) (string, error) {
 	// Collect the dependency chain
 	deps, err := dependencies(path)
 	if err != nil {
@@ -314,7 +363,7 @@ func Merge(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	blob, err := flatten("main", main, pieces)
+	blob, err := flatten("main", main, pieces, shake)
 	if err != nil {
 		return "", err
 	}
