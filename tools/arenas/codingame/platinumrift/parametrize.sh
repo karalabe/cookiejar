@@ -9,26 +9,42 @@ bins="userbin"
 mkdir -p $srcs $bins
 
 # Parametrizes the decay argument
-function decay {
-	inject DECAY_RATE "1 2 3 4 5 6 7 8 9 10" "$@"
+function access_decay {
+	inject $1 $2 ACCESS_DECAY "${@:3}"
 }
 
-function lmfao {
-	inject LMFAO "1.8 2.8 3.8 4.8 5.8 6.8 7.8 8.8 9.8 10.8" "$@"
+function access_weight {
+	inject $1 $2 ACCESS_WEIGHT "${@:3}"
+}
+
+function platinum_decay {
+	inject $1 $2 PLATINUM_DECAY "${@:3}"
+}
+
+function territory_decay {
+	inject $1 $2 TERRITORY_DECAY "${@:3}"
+}
+
+function presence_decay {
+	inject $1 $2 PRESENCE_DECAY "${@:3}"
+}
+
+function threat_weight {
+	inject $1 $2 THREAT_WEIGHT "${@:3}"
 }
 
 # Executes a parameter injection, cascading the function chain
 function inject {
-	# var=$1
-	# vals=$2
-	# file=$3
-	# name=$4
+	# file=$1
+	# name=$2
+	# var=$3
+	# vals=$4
 	# next=$5
 
-	IFS=' ' read -ra ARRAY <<< "$2"
+	IFS=' ' read -ra ARRAY <<< "$4"
 	for PARAM in "${ARRAY[@]}"; do
-		out=${4}_$PARAM
-		sed "s|\($1[ ]*=\)[ ]*[0-9]*[ ]*//[ ]*@PARAM|\1 $PARAM|" < $3 >$srcs/$out.go
+		out=${2}_$PARAM
+		sed "s|\(${3}_${players}P[ ]*=\)[ ]*[0-9]*[ ]*//[ ]*@PARAM|\1 $PARAM|" < $1 >$srcs/$out.go
 		$5 $srcs/$out.go $out "${@:6}"
 	done
 }
@@ -42,6 +58,7 @@ function build {
 # Fetch the base name, source file and chain through the parametrizers
 file=$1
 name="${file%.*}"
-func=$2
+players=$2
+func=$3
 
-$func $file $name "${@:3}"
+$func $file $name "${@:4}"

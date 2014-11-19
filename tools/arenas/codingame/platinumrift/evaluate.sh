@@ -12,8 +12,13 @@ mkdir -p $srcs $bins
 ./parametrize.sh "$@" build
 
 # Iterate over all compiled binaries and generate the output
+echo > res.log
 for ai in `find $bins -type f`; do
-	echo "./platinumrift -user $ai" >> res.log
-	./platinumrift -user $ai >> res.log
+	echo "./platinumrift -user $ai -players $2" >> res.log
+	./platinumrift -user $ai -players $2 >> res.log
 	echo >> res.log
+done
+
+for ai in `find $bins -type f`; do
+  cat res.log | grep wins | grep $ai:
 done

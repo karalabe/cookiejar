@@ -39,13 +39,13 @@ func main() {
 			return
 		}
 	} else {
-		ais, scores, err := simulate(*boards, *ais, *user, *players, *threads)
+		ais, wins, draws, err := simulate(*boards, *ais, *user, *players, *threads)
 		if err != nil {
 			fmt.Printf("Failed to run simulation: %v.\n", err)
 			return
 		}
 		for i := 0; i < len(ais); i++ {
-			fmt.Printf("%40s: %d wins\n", ais[i], scores[i])
+			fmt.Printf("%40s: %d wins, %d draws\n", ais[i], wins[i], draws[i])
 		}
 	}
 }

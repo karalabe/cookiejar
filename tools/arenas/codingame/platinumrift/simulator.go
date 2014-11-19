@@ -41,15 +41,15 @@ type gameStats struct {
 }
 
 //
-func simulate(database string, ais string, user string, players int, threads int) ([]string, []int, error) {
+func simulate(database string, ais string, user string, players int, threads int) ([]string, []int, []int, error) {
 	// Open the replay database
 	db := make(map[int]*gameDetails)
 	if file, err := os.Open(database); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	} else {
 		defer file.Close()
 		if err := gob.NewDecoder(file).Decode(&db); err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 	}
 	// Load all the pre-set AIs
@@ -61,7 +61,8 @@ func simulate(database string, ais string, user string, players int, threads int
 		}
 	}
 	// Battle it out
-	scores := make([]uint32, len(agents)+1)
+	wins := make([]uint32, len(agents)+1)
+	draws := make([]uint32, len(agents)+1)
 
 	pend := new(sync.WaitGroup)
 	pend.Add(len(db))
@@ -72,7 +73,7 @@ func simulate(database string, ais string, user string, players int, threads int
 			defer pend.Done()
 
 			limiter <- struct{}{}
-			if err := matcher(id, game, agents, user, players, []int{}, scores); err != nil {
+			if err := matcher(id, game, agents, user, players, []int{}, wins, draws); err != nil {
 				log15.Crit("Failed to run matchmaker: %v.", err)
 			}
 			<-limiter
@@ -80,14 +81,16 @@ func simulate(database string, ais string, user string, players int, threads int
 	}
 	pend.Wait()
 
-	results := make([]int, len(scores))
-	for i, score := range scores {
-		results[i] = int(score)
+	resWin := make([]int, len(wins))
+	resDraw := make([]int, len(wins))
+	for i := 0; i < len(wins); i++ {
+		resWin[i] = int(wins[i])
+		resDraw[i] = int(draws[i])
 	}
-	return append(agents, user), results, nil
+	return append(agents, user), resWin, resDraw, nil
 }
 
-func matcher(id int, game *gameDetails, ais []string, user string, players int, opponents []int, scores []uint32) error {
+func matcher(id int, game *gameDetails, ais []string, user string, players int, opponents []int, wins, draws []uint32) error {
 	// If the match is made, simulate and score
 	if len(opponents) == players-1 {
 		match := make([]string, players)
@@ -96,21 +99,31 @@ func matcher(id int, game *gameDetails, ais []string, user string, players int, 
 		}
 		match[players-1] = user
 
-		if winner, err := battle(id, game, match); err != nil {
+		if winners, err := battle(id, game, match); err != nil {
 			return err
-		} else {
+		} else if len(winners) == 1 {
+			winner := winners[0]
 			if winner < players-1 {
-				atomic.AddUint32(&scores[opponents[winner]], 1)
+				atomic.AddUint32(&wins[opponents[winner]], 1)
 			} else {
-				atomic.AddUint32(&scores[len(scores)-1], 1)
+				atomic.AddUint32(&wins[len(wins)-1], 1)
+			}
+		} else {
+			for _, winner := range winners {
+				if winner < players-1 {
+					atomic.AddUint32(&draws[opponents[winner]], 1)
+				} else {
+					atomic.AddUint32(&draws[len(draws)-1], 1)
+				}
 			}
 		}
+		log15.Info("Progress report", "wins", wins, "draws", draws)
 		return nil
 	}
 	// Otherwise get a new player into the match
 	for i := 0; i < len(ais); i++ {
 		opponents = append(opponents, i)
-		if err := matcher(id, game, ais, user, players, opponents, scores); err != nil {
+		if err := matcher(id, game, ais, user, players, opponents, wins, draws); err != nil {
 			return err
 		}
 		opponents = opponents[:len(opponents)-1]
@@ -119,7 +132,7 @@ func matcher(id int, game *gameDetails, ais []string, user string, players int, 
 }
 
 // Runs a single battle between players on a given board.
-func battle(id int, game *gameDetails, players []string) (int, error) {
+func battle(id int, game *gameDetails, players []string) ([]int, error) {
 	log15.Info("Running battle", "game", id, "ais", players)
 
 	// Create the game stats for the current battle
@@ -146,7 +159,7 @@ func battle(id int, game *gameDetails, players []string) (int, error) {
 	// Start each of the processes and initialize them
 	for i := 0; i < len(players); i++ {
 		if err := cmds[i].Start(); err != nil {
-			return -1, err
+			return nil, err
 		}
 		defer cmds[i].Process.Kill()
 
@@ -270,7 +283,7 @@ func battle(id int, game *gameDetails, players []string) (int, error) {
 		}
 		// Check for winning conditions
 	}
-	// Report the winner
+	// Report the winner(s)
 	zones := make([]int, len(players))
 	for id := 0; id < game.Zones; id++ {
 		if owner := stats.owner[id]; owner != -1 {
@@ -279,11 +292,17 @@ func battle(id int, game *gameDetails, players []string) (int, error) {
 	}
 	log15.Info("Battle concluded", "game", id, "ais", players, "zones", zones)
 
-	best := 0
-	for i := 1; i < len(players); i++ {
-		if zones[best] < zones[i] {
-			best = i
+	best := -1
+	for i := 0; i < len(players); i++ {
+		if best < zones[i] {
+			best = zones[i]
 		}
 	}
-	return best, nil
+	winners := []int{}
+	for i := 0; i < len(players); i++ {
+		if zones[i] == best {
+			winners = append(winners, i)
+		}
+	}
+	return winners, nil
 }
