@@ -173,7 +173,7 @@ func monitor() {
 					wrapped := wrapperStart + string(source) + wrapperEnd
 
 					// Merge all the dependencies to generate the submission
-					merged, err := deps.Merge(event.Name)
+					merged, err := deps.Merge(event.Name, true)
 					if err != nil {
 						log15.Error("failed to merge submit dependencies", "errir", err)
 						continue
