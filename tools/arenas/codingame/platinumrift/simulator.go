@@ -18,9 +18,9 @@
 package main
 
 import (
+	"bufio"
 	"encoding/gob"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -33,11 +33,17 @@ import (
 	"gopkg.in/karalabe/cookiejar.v2/exts/fmtext"
 )
 
+const (
+	POD_PRICE = 20
+)
+
 type gameStats struct {
 	platinum []int
-	owner    map[int]int
-	fight    map[int]bool
-	fleet    map[int][]int
+	alive    []bool
+
+	owner map[int]int
+	fight map[int]bool
+	fleet map[int][]int
 }
 
 //
@@ -133,11 +139,13 @@ func matcher(id int, game *gameDetails, ais []string, user string, players int, 
 
 // Runs a single battle between players on a given board.
 func battle(id int, game *gameDetails, players []string) ([]int, error) {
-	log15.Info("Running battle", "game", id, "ais", players)
+	logger := log15.New("game", id, "ais", players)
+	logger.Info("Running battle")
 
 	// Create the game stats for the current battle
 	stats := &gameStats{
 		platinum: []int{200, 200, 200, 200},
+		alive:    make([]bool, 4),
 		owner:    make(map[int]int),
 		fight:    make(map[int]bool),
 		fleet:    make(map[int][]int),
@@ -148,13 +156,17 @@ func battle(id int, game *gameDetails, players []string) ([]int, error) {
 		stats.fleet[i] = []int{0, 0, 0, 0}
 	}
 	// Create the AI processes and attach to their streams
-	ins := make([]io.Writer, len(players))
-	outs := make([]io.Reader, len(players))
+	ins := make([]*bufio.Writer, len(players))
+	outs := make([]*bufio.Reader, len(players))
 	cmds := make([]*exec.Cmd, len(players))
 	for i, player := range players {
 		cmds[i] = exec.Command(player)
-		ins[i], _ = cmds[i].StdinPipe()
-		outs[i], _ = cmds[i].StdoutPipe()
+
+		in, _ := cmds[i].StdinPipe()
+		out, _ := cmds[i].StdoutPipe()
+
+		ins[i] = bufio.NewWriter(in)
+		outs[i] = bufio.NewReader(out)
 	}
 	// Start each of the processes and initialize them
 	for i := 0; i < len(players); i++ {
@@ -172,6 +184,9 @@ func battle(id int, game *gameDetails, players []string) ([]int, error) {
 				fmt.Fprintf(ins[i], "%d %d\n", src, dst)
 			}
 		}
+		ins[i].Flush()
+
+		stats.alive[i] = true
 	}
 	// Iterate the game until a winning condition is reached
 	for r := 0; r < 200; r++ {
@@ -184,11 +199,17 @@ func battle(id int, game *gameDetails, players []string) ([]int, error) {
 		// Moving and buying: update each player and fetch the moves
 		moves, deploys := make([]string, len(players)), make([]string, len(players))
 		for i := 0; i < len(players); i++ {
-			fmt.Fprintf(ins[i], "%d\n", stats.platinum[i])
-			for zone := 0; zone < game.Zones; zone++ {
-				fmt.Fprintf(ins[i], "%d %d %d %d %d %d\n", zone, stats.owner[zone], stats.fleet[zone][0], stats.fleet[zone][1], stats.fleet[zone][2], stats.fleet[zone][3])
+			if stats.alive[i] {
+				fmt.Fprintf(ins[i], "%d\n", stats.platinum[i])
+				for zone := 0; zone < game.Zones; zone++ {
+					fmt.Fprintf(ins[i], "%d %d %d %d %d %d\n", zone, stats.owner[zone], stats.fleet[zone][0], stats.fleet[zone][1], stats.fleet[zone][2], stats.fleet[zone][3])
+				}
+				ins[i].Flush()
+
+				moves[i], deploys[i] = fmtext.FscanLine(outs[i]), fmtext.FscanLine(outs[i])
+			} else {
+				moves[i], deploys[i] = "WAIT", "WAIT"
 			}
-			moves[i], deploys[i] = fmtext.FscanLine(outs[i]), fmtext.FscanLine(outs[i])
 		}
 		for i := 0; i < len(players); i++ {
 			if moves[i] == "WAIT" {
@@ -203,11 +224,11 @@ func battle(id int, game *gameDetails, players []string) ([]int, error) {
 				}
 				// Validate the move
 				if stats.fleet[src][i] < count {
-					log15.Warn("Not enough pods", "zone", src, "available", stats.fleet[src][i], "moved", count)
+					logger.Warn("Not enough pods", "zone", src, "available", stats.fleet[src][i], "moved", count)
 					continue
 				}
 				if stats.fight[src] && stats.owner[dst] != i && stats.owner[dst] != -1 {
-					log15.Warn("Invalid flee destination", "zone", dst, "owner", stats.owner[dst])
+					logger.Warn("Invalid flee destination", "zone", dst, "owner", stats.owner[dst])
 					continue
 				}
 				// Update the fleet stats
@@ -227,16 +248,16 @@ func battle(id int, game *gameDetails, players []string) ([]int, error) {
 					break
 				}
 				// Validate the deploy
-				if count*20 > stats.platinum[i] {
-					log15.Warn("Not enough platinum", "available", stats.platinum[i], "spent", count*20)
+				if count*POD_PRICE > stats.platinum[i] {
+					logger.Warn("Not enough platinum", "available", stats.platinum[i], "spent", count*POD_PRICE)
 					continue
 				}
 				if stats.owner[dst] != i && stats.owner[dst] != -1 {
-					log15.Warn("Invalid deploy destination", "zone", dst, "owner", stats.owner[dst])
+					logger.Warn("Invalid deploy destination", "zone", dst, "owner", stats.owner[dst])
 					continue
 				}
 				// Update the fleet stats
-				stats.platinum[i] -= count * 20
+				stats.platinum[i] -= count * POD_PRICE
 				stats.fleet[dst][i] += count
 			}
 		}
@@ -281,7 +302,49 @@ func battle(id int, game *gameDetails, players []string) ([]int, error) {
 			}
 			stats.fight[id] = (owner == -2)
 		}
+		// Check for eliminated players (i.e. no pods, no platinum)
+		for i := 0; i < len(players); i++ {
+			if stats.alive[i] {
+				// If it can still buy pods, leave it playing
+				if stats.platinum[i] > POD_PRICE {
+					continue
+				}
+				// If it still had pods or territories, leave it playing
+				present := false
+				for id := 0; !present && id < game.Zones; id++ {
+					if stats.owner[id] == i || stats.fleet[id][i] > 0 {
+						present = true
+					}
+				}
+				// He's dead Jim
+				if !present {
+					logger.Info("Player eliminated", "player", i, "round", r)
+					stats.alive[i] = false
+				}
+			}
+		}
 		// Check for winning conditions
+
+		// Game over: fully owned by one player
+		owned := stats.owner[0] != -1
+		for id := 0; owned && id < game.Zones; id++ {
+			if stats.owner[id] != stats.owner[0] {
+				owned = false
+			}
+		}
+		if owned {
+			logger.Info("Map completely owned", "player", stats.owner[0], "round", r)
+			break
+		}
+		// Game over: all players dead
+		dead := !stats.alive[0]
+		for i := 1; dead && i < len(players); i++ {
+			dead = !stats.alive[1]
+		}
+		if dead {
+			logger.Info("Players died out", "round", r)
+			break
+		}
 	}
 	// Report the winner(s)
 	zones := make([]int, len(players))
@@ -290,7 +353,7 @@ func battle(id int, game *gameDetails, players []string) ([]int, error) {
 			zones[owner]++
 		}
 	}
-	log15.Info("Battle concluded", "game", id, "ais", players, "zones", zones)
+	logger.Info("Battle concluded", "zones", zones)
 
 	best := -1
 	for i := 0; i < len(players); i++ {
