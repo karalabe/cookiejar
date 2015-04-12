@@ -10,38 +10,44 @@ This toolbox is a work in progress for the time being. It may be lacking, and it
 
 To get the package, execute:
 
-    go get gopkg.in/karalabe/cookiejar.v1
+    go get gopkg.in/karalabe/cookiejar.v2
 
 To import this package, add the following line to your code:
 
-    import "gopkg.in/karalabe/cookiejar.v1"
+    import "gopkg.in/karalabe/cookiejar.v2"
 
-For more details, see the [package documentation](http://godoc.org/gopkg.in/karalabe/cookiejar.v1).
+For more details, see the [package documentation](http://godoc.org/gopkg.in/karalabe/cookiejar.v2).
 
   Contents
 ------------
 
 Algorithms:
  - Graph
-     - [Breadth First Search](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/graph/bfs)
-     - [Depth First Search](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/graph/dfs)
+     - [Breadth First Search](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/graph/bfs)
+     - [Depth First Search](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/graph/dfs)
 
 Data structures:
- - [Bag](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/bag)
- - [Deque](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/deque)
- - [Graph](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/graph)
- - [Priority Queue](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/prque)
- - [Queue](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/queue)
- - [Set](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/set)
- - [Stack](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/collections/stack)
+ - [Bag](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/collections/bag)
+ - [Deque](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/collections/deque)
+ - [Graph](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/graph)
+ - [Priority Queue](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/collections/prque)
+ - [Queue](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/collections/queue)
+ - [Set](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/collections/set)
+ - [Stack](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/collections/stack)
  
 Extensions:
- - [math](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/exts/mathext)
-     - Min & Max for int and *big.Int/Rat
- - [sort](http://godoc.org/gopkg.in/karalabe/cookiejar.v1/exts/sortext)
-     - Sort and Search for *big.Int/Rat
-     - Unique for any sort.Interface
- 
+ - [fmt](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/exts/fmtext)
+     - `Scan` and `Fscan` for `int`, `float64`, `string` and lines
+ - [math](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/exts/mathext)
+     - `Abs` for `int`
+     - `Min` and `Max` for `int`, `big.Int` and `big.Rat`
+     - `Sign` for `int` and `float64`
+ - [os](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/exts/osext)
+     - `Open` and `Create` without error codes
+ - [sort](http://godoc.org/gopkg.in/karalabe/cookiejar.v2/exts/sortext)
+     - `Sort` and `Search` for `big.Int` and `big.Rat`
+     - `Unique` for any `sort.Interface`
+
 Below are the performance results for the data structures and the complexity analysis for the algorithms.
 
   Performance
