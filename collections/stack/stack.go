@@ -93,8 +93,5 @@ func (s *Stack) Size() int {
 
 // Resets the stack, effectively clearing its contents.
 func (s *Stack) Reset() {
-	s.size = 0
-	s.offset = 0
-	s.active = s.blocks[0]
-	s.capacity = blockSize
+	*s = *New()
 }

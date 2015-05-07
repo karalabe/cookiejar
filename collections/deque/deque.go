@@ -146,10 +146,5 @@ func (d *Deque) Size() int {
 
 // Clears out the contents of the queue.
 func (d *Deque) Reset() {
-	d.leftIdx = 0
-	d.rightIdx = 0
-	d.leftOff = 0
-	d.rightOff = 0
-	d.left = d.blocks[0]
-	d.right = d.blocks[0]
+	*d = *New()
 }

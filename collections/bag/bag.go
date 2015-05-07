@@ -73,6 +73,5 @@ func (b *Bag) Do(f func(interface{})) {
 
 // Clears the contents of a bag.
 func (b *Bag) Reset() {
-	b.size = 0
-	b.data = make(map[interface{}]int)
+	*b = *New()
 }

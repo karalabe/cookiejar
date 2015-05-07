@@ -61,5 +61,5 @@ func (s *Set) Do(f func(interface{})) {
 
 // Clears the contents of a set.
 func (s *Set) Reset() {
-	s.data = make(map[interface{}]struct{})
+	*s = *New()
 }

@@ -103,10 +103,5 @@ func (q *Queue) Size() int {
 
 // Clears out the contents of the queue.
 func (q *Queue) Reset() {
-	q.headIdx = 0
-	q.tailIdx = 0
-	q.headOff = 0
-	q.tailOff = 0
-	q.head = q.blocks[0]
-	q.tail = q.blocks[0]
+	*q = *New()
 }
